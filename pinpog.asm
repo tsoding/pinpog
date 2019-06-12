@@ -1,5 +1,4 @@
     org 0x7C00
-%define ROW 50
 %define WIDTH 320
 %define HEIGHT 200
 
