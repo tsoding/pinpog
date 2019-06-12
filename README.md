@@ -14,6 +14,7 @@ $ make
 
 ## Useful Documents
 
+- https://en.wikipedia.org/wiki/Mode_13h
 - http://www.cs.cmu.edu/~ralf/files.html
 - http://www.ctyme.com/intr/int.htm
 
