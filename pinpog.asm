@@ -14,11 +14,6 @@
     mov ax, 0xA000
     mov es, ax
 
-    mov word [ball_x], 0
-    mov word [ball_y], 0
-    mov word [ball_dx], 1
-    mov word [ball_dy], 1
-
 main_loop:
     mov ch, 0x00
     call draw_ball
@@ -66,13 +61,13 @@ draw_ball_j:                    ;col
 
     ret
 
-i: dw 0
-j: dw 0
+i: dw 0xcccc
+j: dw 0xcccc
 
 ball_x: dw 0
 ball_y: dw 0
-ball_dx: dw 0
-ball_dy: dw 0
+ball_dx: dw 1
+ball_dy: dw 1
 
     times 510 - ($-$$) db 0
     dw 0xaa55
