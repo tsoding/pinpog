@@ -21,9 +21,10 @@
     mov word [ball_dy], 1
 
 main_loop:
-    ; mov ch, 0x00
-    ; call draw_ball
+    mov ch, 0x00
+    call draw_ball
 
+;; TODO: make ball bounce of the walls
     mov ax, [ball_x]
     add ax, [ball_dx]
     mov [ball_x], ax
@@ -35,6 +36,7 @@ main_loop:
     mov ch, 0x0A
     call draw_ball
 
+;; TODO: sync the loop so the ball at least visible
     jmp main_loop
 
 draw_ball:
