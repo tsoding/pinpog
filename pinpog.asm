@@ -23,7 +23,7 @@ main_loop:
     mov ch, 0x00
     call draw_ball
 
-;; TODO: make ball bounce of the walls
+;; TODO(#2): make ball bounce of the walls
     mov ax, [ball_x]
     add ax, [ball_dx]
     mov [ball_x], ax
