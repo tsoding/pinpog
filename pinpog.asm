@@ -36,7 +36,7 @@ main_loop:
     mov ch, 0x0A
     call draw_ball
 
-;; TODO: sync the loop so the ball at least visible
+;; TODO(#4): sync the loop so the ball at least visible
     jmp main_loop
 
 draw_ball:
