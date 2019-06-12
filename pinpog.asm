@@ -32,6 +32,7 @@ main_loop:
     add ax, [ball_dy]
     mov [ball_y], ax
 
+;; TODO: redrawing the ball flickers a lot
     mov ch, 0x0A
     call draw_ball
 
