@@ -156,7 +156,7 @@ draw_ball:
 x: dw 0xcccc
 y: dw 0xcccc
 
-;; TODO: Introduce bar at the bottom that is controlled by the player
+;; TODO(#10): Introduce bar at the bottom that is controlled by the player
 ball_x: dw 30
 ball_y: dw 30
 ball_dx: dw 2
