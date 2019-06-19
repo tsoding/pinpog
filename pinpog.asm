@@ -24,6 +24,7 @@
 %define BALL_WIDTH 10
 %define BALL_HEIGHT 10
 
+entry:
     mov ah, 0x00
     ; VGA mode 0x13
     ; 320x200 256 colors
@@ -38,7 +39,16 @@
     mov word [es:0x0070], draw_frame
     mov word [es:0x0072], 0x00
 
-    jmp $
+.loop:
+    mov ah, 0x1
+    int 0x16
+    jz .loop
+
+    mov ah, 0x0
+    int 0x16
+    neg word [ball_dx]
+
+    jmp .loop
 
 draw_frame:
     pusha
