@@ -164,3 +164,7 @@ ball_dy: dw (-2)
 
     times 510 - ($-$$) db 0
     dw 0xaa55
+
+    %if $ - $$ != 512
+        %fatal Resulting size is not 512
+    %endif
