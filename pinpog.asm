@@ -46,32 +46,34 @@ draw_frame:
 draw_ball:
     ;; ch - color
 
-    mov word [i], 0
-draw_ball_i:                    ;row
-    mov word [j], 0
-draw_ball_j:                    ;col
+    mov ax, 0x0000
+    mov ds, ax
 
+    mov word [y], 0
+.y:
+    mov word [x], 0
+.x:
     mov ax, WIDTH
-    mov bx, [i]
-    add bx, [ball_x]
+    mov bx, [y]
+    add bx, [ball_y]
     mul bx
     mov bx, ax
-    add bx, [j]
-    add bx, [ball_y]
+    add bx, [x]
+    add bx, [ball_x]
     mov BYTE [es: bx], ch
 
-    inc word [j]
-    cmp word [j], BALL_WIDTH
-    jb draw_ball_j
+    inc word [x]
+    cmp word [x], BALL_WIDTH
+    jb .x
 
-    inc word [i]
-    cmp word [i], BALL_HEIGHT
-    jb draw_ball_i
+    inc word [y]
+    cmp word [y], BALL_HEIGHT
+    jb .y
 
     ret
 
-i: dw 0xcccc
-j: dw 0xcccc
+x: dw 0xcccc
+y: dw 0xcccc
 
 ball_x: dw 0
 ball_y: dw 0
