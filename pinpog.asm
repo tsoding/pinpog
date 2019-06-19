@@ -21,6 +21,9 @@
 draw_frame:
     pusha
 
+    mov ax, 0x0000
+    mov ds, ax
+
     mov ax, 0xA000
     mov es, ax
 
@@ -28,6 +31,34 @@ draw_frame:
     call draw_ball
 
 ;; TODO(#2): make ball bounce of the walls
+    ;; if (ball_x <= 0 || ball_x >= WIDTH - BALL_WIDTH) {
+    ;;   ball_dx = -ball_dx;
+    ;; }
+    cmp word [ball_x], 0
+    jle .neg_dx
+
+    cmp word [ball_x], WIDTH - BALL_WIDTH
+    jge .neg_dx
+
+    jmp .horcol_end
+.neg_dx:
+    neg word [ball_dx]
+.horcol_end:
+
+    ;; if (ball_y <= 0 || ball_y >= HEIGHT - BALL_HEIGHT) {
+    ;;   ball_dy = -ball_dy;
+    ;; }
+    cmp word [ball_y], 0
+    jle .neg_dy
+
+    cmp word [ball_y], HEIGHT - BALL_HEIGHT
+    jge .neg_dy
+
+    jmp .vercol_end
+.neg_dy:
+    neg word [ball_dy]
+.vercol_end:
+
     mov ax, [ball_x]
     add ax, [ball_dx]
     mov [ball_x], ax
@@ -75,10 +106,10 @@ draw_ball:
 x: dw 0xcccc
 y: dw 0xcccc
 
-ball_x: dw 0
-ball_y: dw 0
-ball_dx: dw 1
-ball_dy: dw 1
+ball_x: dw 30
+ball_y: dw 30
+ball_dx: dw 2
+ball_dy: dw (-2)
 
     times 510 - ($-$$) db 0
     dw 0xaa55
