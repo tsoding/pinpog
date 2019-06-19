@@ -113,7 +113,7 @@ fill_screen:
     mov ax, 0xA000
     mov es, ax
 
-;; TODO: could be rewritten with rep stuff
+;; TODO(#9): could be rewritten with rep stuff
     xor bx, bx
 .loop:
     mov BYTE [es: bx], ch
@@ -156,6 +156,7 @@ draw_ball:
 x: dw 0xcccc
 y: dw 0xcccc
 
+;; TODO: Introduce bar at the bottom that is controlled by the player
 ball_x: dw 30
 ball_y: dw 30
 ball_dx: dw 2
