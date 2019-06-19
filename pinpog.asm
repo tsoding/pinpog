@@ -62,7 +62,6 @@ draw_frame:
     mov ch, BACKGROUND_COLOR
     call draw_ball
 
-;; TODO(#2): make ball bounce of the walls
     ;; if (ball_x <= 0 || ball_x >= WIDTH - BALL_WIDTH) {
     ;;   ball_dx = -ball_dx;
     ;; }
