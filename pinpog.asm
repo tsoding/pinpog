@@ -2,6 +2,25 @@
 %define WIDTH 320
 %define HEIGHT 200
 
+%define COLOR_BLACK 0
+%define COLOR_BLUE 1
+%define COLOR_GREEN 2
+%define COLOR_CYAN 3
+%define COLOR_RED 4
+%define COLOR_MAGENTA 5
+%define COLOR_BROWN 6
+%define COLOR_LIGHTGRAY 7
+%define COLOR_DARKGRAY 8
+%define COLOR_LIGHTBLUE 9
+%define COLOR_LIGHTGREEN 10
+%define COLOR_LIGHTCYAN 11
+%define COLOR_LIGHTRED 12
+%define COLOR_LIGHTMAGENTA 13
+%define COLOR_YELLOW 14
+%define COLOR_WHITE 15
+
+%define BACKGROUND_COLOR COLOR_DARKGRAY
+
 %define BALL_WIDTH 10
 %define BALL_HEIGHT 10
 
@@ -10,6 +29,9 @@
     ; 320x200 256 colors
     mov al, 0x13
     int 0x10
+
+    mov ch, BACKGROUND_COLOR
+    call fill_screen
 
     xor ax, ax
     mov es, ax
@@ -27,7 +49,7 @@ draw_frame:
     mov ax, 0xA000
     mov es, ax
 
-    mov ch, 0x00
+    mov ch, BACKGROUND_COLOR
     call draw_ball
 
 ;; TODO(#2): make ball bounce of the walls
@@ -73,6 +95,24 @@ draw_frame:
 
     popa
     iret
+
+fill_screen:
+    ;; ch - color
+    pusha
+
+    mov ax, 0xA000
+    mov es, ax
+
+;; TODO: could be rewritten with rep stuff
+    xor bx, bx
+.loop:
+    mov BYTE [es: bx], ch
+    inc bx
+    cmp bx, WIDTH * HEIGHT
+    jb .loop
+
+    popa
+    ret
 
 draw_ball:
     ;; ch - color
