@@ -17,5 +17,5 @@ $ make
 - https://en.wikipedia.org/wiki/Mode_13h
 - http://www.ctyme.com/intr/int.htm
 
-[nasm]: https://www.nasm.org/
+[nasm]: https://www.nasm.us/
 [qemu]: https://www.qemu.org/
