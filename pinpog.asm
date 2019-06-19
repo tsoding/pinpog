@@ -11,10 +11,19 @@
     mov al, 0x13
     int 0x10
 
+    xor ax, ax
+    mov es, ax
+    mov word [es:0x0070], draw_frame
+    mov word [es:0x0072], 0x00
+
+    jmp $
+
+draw_frame:
+    pusha
+
     mov ax, 0xA000
     mov es, ax
 
-main_loop:
     mov ch, 0x00
     call draw_ball
 
@@ -31,8 +40,8 @@ main_loop:
     mov ch, 0x0A
     call draw_ball
 
-;; TODO(#4): sync the loop so the ball at least visible
-    jmp main_loop
+    popa
+    iret
 
 draw_ball:
     ;; ch - color
