@@ -60,6 +60,12 @@ entry:
     cmp al, 'd'
     jz .swipe_right
 
+    cmp al, ' '
+    jz .toggle_pause
+
+    cmp al, 'u'
+    jz .unpause
+
     jmp .loop
 .swipe_left:
     mov word [bar_dx], -10
@@ -67,7 +73,15 @@ entry:
 .swipe_right:
     mov word [bar_dx], 10
     jmp .loop
-
+.toggle_pause:
+    mov ax, word [es:0x0070]
+    cmp ax, do_nothing
+    jz .unpause
+    mov word [es:0x0070], do_nothing
+    jmp .loop
+.unpause:
+    mov word [es:0x0070], draw_frame
+    jmp .loop
 
 draw_frame:
     pusha
@@ -109,6 +123,7 @@ draw_frame:
     neg word [ball_dx]
 .ball_x_col:
 
+    ;; TODO: No game over when ball hits the ground
     ;; if (ball_y <= 0 || ball_y >= HEIGHT - BALL_HEIGHT) {
     ;;   ball_dy = -ball_dy;
     ;; }
@@ -138,6 +153,7 @@ draw_frame:
     neg word [ball_dy]
 .ball_y_col:
 
+    ;; TODO: Sometimes the bar gets stuck in a wall
     ;; if (bar_x <= 0 || bar_x >= WIDTH - BAR_WIDTH) {
     ;;   bar_dx = -bar_dx;
     ;; }
@@ -185,6 +201,7 @@ draw_frame:
     call fill_rect
 
     popa
+do_nothing:
     iret
 
 fill_screen:
@@ -240,6 +257,9 @@ x: dw 0xcccc
 y: dw 0xcccc
 
 ;; TODO(#10): Introduce bar at the bottom that is controlled by the player
+;; TODO: Game does not keep track of the score
+;;   Every bar hit should give you points
+;; TODO: Game does not get harder over time
 ball_x: dw 30
 ball_y: dw 30
 ball_dx: dw BALL_VELOCITY
