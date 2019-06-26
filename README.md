@@ -21,3 +21,15 @@ $ make
 
 [nasm]: https://www.nasm.us/
 [qemu]: https://www.qemu.org/
+
+## Building on MacOS
+
+1. `brew install nasm`
+2. `brew install qemu`
+
+### Running
+
+1. `make`
+
+There should be an emulator window that fires up called
+"qemu-system-i386" (which doesn't automatically refocus to the foreground).
