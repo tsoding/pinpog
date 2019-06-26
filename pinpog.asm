@@ -63,9 +63,6 @@ entry:
     cmp al, ' '
     jz .toggle_pause
 
-    cmp al, 'u'
-    jz .unpause
-
     jmp .loop
 .swipe_left:
     mov word [bar_dx], -10
