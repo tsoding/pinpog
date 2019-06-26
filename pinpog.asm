@@ -154,7 +154,7 @@ draw_frame:
     neg word [ball_dy]
 .ball_y_col:
 
-    ;; TODO: Sometimes the bar gets stuck in a wall
+    ;; TODO(#17): Sometimes the bar gets stuck in a wall
 
     ;; if (bar_x <= 0 || bar_x >= WIDTH - BAR_WIDTH) {
     ;;   bar_dx = -bar_dx;
