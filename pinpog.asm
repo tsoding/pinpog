@@ -59,8 +59,16 @@ draw_frame:
     mov ax, 0xA000
     mov es, ax
 
+    mov word [rect_width], BALL_WIDTH
+    mov word [rect_height], BALL_HEIGHT
+
+    mov ax, word [ball_x]
+    mov word [rect_x], ax
+    mov ax, word [ball_y]
+    mov word [rect_y], ax
+
     mov ch, BACKGROUND_COLOR
-    call draw_ball
+    call fill_rect
 
     ;; if (ball_x <= 0 || ball_x >= WIDTH - BALL_WIDTH) {
     ;;   ball_dx = -ball_dx;
@@ -98,9 +106,13 @@ draw_frame:
     add ax, [ball_dy]
     mov [ball_y], ax
 
-;; TODO(#3): redrawing the ball flickers a lot
+    mov ax, word [ball_x]
+    mov word [rect_x], ax
+    mov ax, word [ball_y]
+    mov word [rect_y], ax
+
     mov ch, 0x0A
-    call draw_ball
+    call fill_rect
 
     popa
     iret
@@ -123,7 +135,7 @@ fill_screen:
     popa
     ret
 
-draw_ball:
+fill_rect:
     ;; ch - color
 
     mov ax, 0x0000
@@ -135,19 +147,21 @@ draw_ball:
 .x:
     mov ax, WIDTH
     mov bx, [y]
-    add bx, [ball_y]
+    add bx, [rect_y]
     mul bx
     mov bx, ax
     add bx, [x]
-    add bx, [ball_x]
+    add bx, [rect_x]
     mov BYTE [es: bx], ch
 
     inc word [x]
-    cmp word [x], BALL_WIDTH
+    mov dx, [rect_width]
+    cmp [x], dx
     jb .x
 
     inc word [y]
-    cmp word [y], BALL_HEIGHT
+    mov dx, [rect_height]
+    cmp [y], dx
     jb .y
 
     ret
@@ -160,6 +174,13 @@ ball_x: dw 30
 ball_y: dw 30
 ball_dx: dw 2
 ball_dy: dw (-2)
+bar_x: dw 0
+bar_y: dw 0
+
+rect_x: dw 0xcccc
+rect_y: dw 0xcccc
+rect_width: dw 0xcccc
+rect_height: dw 0xcccc
 
     times 510 - ($-$$) db 0
     dw 0xaa55
