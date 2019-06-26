@@ -208,7 +208,7 @@ do_nothing:
     iret
 
 ;; TODO(#23): no proper way to restart the game when you are in game over state
-;; TODO: there is no "Game Over" sign in the Game Over state
+;; TODO(#24): there is no "Game Over" sign in the Game Over state
 game_over:
     pusha
     mov ch, COLOR_RED
