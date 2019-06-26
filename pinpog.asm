@@ -23,9 +23,11 @@
 
 %define BALL_WIDTH 10
 %define BALL_HEIGHT 10
+%define BALL_VELOCITY 4
 %define BALL_COLOR COLOR_YELLOW
 
 %define BAR_WIDTH 100
+%define BAR_Y 50
 %define BAR_HEIGHT BALL_HEIGHT
 %define BAR_COLOR COLOR_LIGHTBLUE
 
@@ -89,7 +91,7 @@ draw_frame:
     mov word [rect_height], BAR_HEIGHT
     mov ax, [bar_x]
     mov [rect_x], ax
-    mov word [rect_y], HEIGHT - 20
+    mov word [rect_y], HEIGHT - BAR_Y
     mov ch, BACKGROUND_COLOR
     call fill_rect
 
@@ -113,7 +115,22 @@ draw_frame:
     cmp word [ball_y], 0
     jle .neg_ball_dy
 
-    cmp word [ball_y], HEIGHT - BALL_HEIGHT
+    mov ax, HEIGHT - BALL_HEIGHT
+
+    ;; bar_x <= ball_x && ball_x - bar_x <= BAR_WIDTH - BALL_WIDTH
+    mov bx, word [ball_x]
+    cmp word [bar_x], bx
+    jle .right_bound
+    jmp .right_bound_end
+.right_bound:
+    mov bx, word [ball_x]
+    sub bx, word [bar_x]
+    cmp bx, BAR_WIDTH - BALL_WIDTH
+    jg .right_bound_end
+    sub ax, BAR_Y
+.right_bound_end:
+
+    cmp word [ball_y], ax
     jge .neg_ball_dy
 
     jmp .ball_y_col
@@ -163,7 +180,7 @@ draw_frame:
     mov word [rect_height], BAR_HEIGHT
     mov ax, [bar_x]
     mov [rect_x], ax
-    mov word [rect_y], HEIGHT - 20
+    mov word [rect_y], HEIGHT - BAR_Y
     mov ch, BAR_COLOR
     call fill_rect
 
@@ -225,8 +242,8 @@ y: dw 0xcccc
 ;; TODO(#10): Introduce bar at the bottom that is controlled by the player
 ball_x: dw 30
 ball_y: dw 30
-ball_dx: dw 2
-ball_dy: dw (-2)
+ball_dx: dw BALL_VELOCITY
+ball_dy: dw -BALL_VELOCITY
 
 bar_x: dw 10
 bar_y: dw 0
