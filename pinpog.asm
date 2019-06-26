@@ -261,7 +261,7 @@ y: dw 0xcccc
 ;; TODO(#10): Introduce bar at the bottom that is controlled by the player
 ;; TODO(#18): Game does not keep track of the score
 ;;   Every bar hit should give you points
-;; TODO: Game does not get harder over time
+;; TODO(#19): Game does not get harder over time
 ball_x: dw 30
 ball_y: dw 30
 ball_dx: dw BALL_VELOCITY
