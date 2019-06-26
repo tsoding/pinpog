@@ -23,6 +23,13 @@
 
 %define BALL_WIDTH 10
 %define BALL_HEIGHT 10
+%define BALL_VELOCITY 4
+%define BALL_COLOR COLOR_YELLOW
+
+%define BAR_WIDTH 100
+%define BAR_Y 50
+%define BAR_HEIGHT BALL_HEIGHT
+%define BAR_COLOR COLOR_LIGHTBLUE
 
 entry:
     mov ah, 0x00
@@ -46,8 +53,34 @@ entry:
 
     mov ah, 0x0
     int 0x16
-    neg word [ball_dx]
 
+    cmp al, 'a'
+    jz .swipe_left
+
+    cmp al, 'd'
+    jz .swipe_right
+
+    cmp al, ' '
+    jz .toggle_pause
+
+    cmp al, 'u'
+    jz .unpause
+
+    jmp .loop
+.swipe_left:
+    mov word [bar_dx], -10
+    jmp .loop
+.swipe_right:
+    mov word [bar_dx], 10
+    jmp .loop
+.toggle_pause:
+    mov ax, word [es:0x0070]
+    cmp ax, do_nothing
+    jz .unpause
+    mov word [es:0x0070], do_nothing
+    jmp .loop
+.unpause:
+    mov word [es:0x0070], draw_frame
     jmp .loop
 
 draw_frame:
@@ -59,50 +92,118 @@ draw_frame:
     mov ax, 0xA000
     mov es, ax
 
+    mov word [rect_width], BALL_WIDTH
+    mov word [rect_height], BALL_HEIGHT
+    mov ax, word [ball_x]
+    mov word [rect_x], ax
+    mov ax, word [ball_y]
+    mov word [rect_y], ax
     mov ch, BACKGROUND_COLOR
-    call draw_ball
+    call fill_rect
+
+    mov word [rect_width], BAR_WIDTH
+    mov word [rect_height], BAR_HEIGHT
+    mov ax, [bar_x]
+    mov [rect_x], ax
+    mov word [rect_y], HEIGHT - BAR_Y
+    mov ch, BACKGROUND_COLOR
+    call fill_rect
 
     ;; if (ball_x <= 0 || ball_x >= WIDTH - BALL_WIDTH) {
     ;;   ball_dx = -ball_dx;
     ;; }
     cmp word [ball_x], 0
-    jle .neg_dx
+    jle .neg_ball_dx
 
     cmp word [ball_x], WIDTH - BALL_WIDTH
-    jge .neg_dx
+    jge .neg_ball_dx
 
-    jmp .horcol_end
-.neg_dx:
+    jmp .ball_x_col
+.neg_ball_dx:
     neg word [ball_dx]
-.horcol_end:
+.ball_x_col:
+
+    ;; TODO(#16): No game over when ball hits the ground
 
     ;; if (ball_y <= 0 || ball_y >= HEIGHT - BALL_HEIGHT) {
     ;;   ball_dy = -ball_dy;
     ;; }
     cmp word [ball_y], 0
-    jle .neg_dy
+    jle .neg_ball_dy
 
-    cmp word [ball_y], HEIGHT - BALL_HEIGHT
-    jge .neg_dy
+    mov ax, HEIGHT - BALL_HEIGHT
 
-    jmp .vercol_end
-.neg_dy:
+    ;; bar_x <= ball_x && ball_x - bar_x <= BAR_WIDTH - BALL_WIDTH
+    mov bx, word [ball_x]
+    cmp word [bar_x], bx
+    jle .right_bound
+    jmp .right_bound_end
+.right_bound:
+    mov bx, word [ball_x]
+    sub bx, word [bar_x]
+    cmp bx, BAR_WIDTH - BALL_WIDTH
+    jg .right_bound_end
+    sub ax, BAR_Y
+.right_bound_end:
+
+    cmp word [ball_y], ax
+    jge .neg_ball_dy
+
+    jmp .ball_y_col
+.neg_ball_dy:
     neg word [ball_dy]
-.vercol_end:
+.ball_y_col:
 
+    ;; TODO(#17): Sometimes the bar gets stuck in a wall
+
+    ;; if (bar_x <= 0 || bar_x >= WIDTH - BAR_WIDTH) {
+    ;;   bar_dx = -bar_dx;
+    ;; }
+    cmp word [bar_x], 0
+    jle .neg_bar_dx
+
+    cmp word [bar_x], WIDTH - BAR_WIDTH
+    jge .neg_bar_dx
+
+    jmp .bar_x_col
+.neg_bar_dx:
+    neg word [bar_dx]
+.bar_x_col:
+
+    ;; ball_x += ball_dx
     mov ax, [ball_x]
     add ax, [ball_dx]
     mov [ball_x], ax
 
+    ;; ball_y += ball_dy
     mov ax, [ball_y]
     add ax, [ball_dy]
     mov [ball_y], ax
 
-;; TODO(#3): redrawing the ball flickers a lot
-    mov ch, 0x0A
-    call draw_ball
+    ;; bar_x += bar_dx
+    mov ax, [bar_x]
+    add ax, [bar_dx]
+    mov [bar_x], ax
+
+    mov word [rect_width], BALL_WIDTH
+    mov word [rect_height], BALL_HEIGHT
+    mov ax, word [ball_x]
+    mov word [rect_x], ax
+    mov ax, word [ball_y]
+    mov word [rect_y], ax
+    mov ch, BALL_COLOR
+    call fill_rect
+
+    mov word [rect_width], BAR_WIDTH
+    mov word [rect_height], BAR_HEIGHT
+    mov ax, [bar_x]
+    mov [rect_x], ax
+    mov word [rect_y], HEIGHT - BAR_Y
+    mov ch, BAR_COLOR
+    call fill_rect
 
     popa
+do_nothing:
     iret
 
 fill_screen:
@@ -123,7 +224,7 @@ fill_screen:
     popa
     ret
 
-draw_ball:
+fill_rect:
     ;; ch - color
 
     mov ax, 0x0000
@@ -135,19 +236,21 @@ draw_ball:
 .x:
     mov ax, WIDTH
     mov bx, [y]
-    add bx, [ball_y]
+    add bx, [rect_y]
     mul bx
     mov bx, ax
     add bx, [x]
-    add bx, [ball_x]
+    add bx, [rect_x]
     mov BYTE [es: bx], ch
 
     inc word [x]
-    cmp word [x], BALL_WIDTH
+    mov dx, [rect_width]
+    cmp [x], dx
     jb .x
 
     inc word [y]
-    cmp word [y], BALL_HEIGHT
+    mov dx, [rect_height]
+    cmp [y], dx
     jb .y
 
     ret
@@ -156,10 +259,22 @@ x: dw 0xcccc
 y: dw 0xcccc
 
 ;; TODO(#10): Introduce bar at the bottom that is controlled by the player
+;; TODO(#18): Game does not keep track of the score
+;;   Every bar hit should give you points
+;; TODO(#19): Game does not get harder over time
 ball_x: dw 30
 ball_y: dw 30
-ball_dx: dw 2
-ball_dy: dw (-2)
+ball_dx: dw BALL_VELOCITY
+ball_dy: dw -BALL_VELOCITY
+
+bar_x: dw 10
+bar_y: dw 0
+bar_dx: dw 10
+
+rect_x: dw 0xcccc
+rect_y: dw 0xcccc
+rect_width: dw 0xcccc
+rect_height: dw 0xcccc
 
     times 510 - ($-$$) db 0
     dw 0xaa55

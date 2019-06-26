@@ -12,6 +12,8 @@ $ nix-shell   # For NixOS
 $ make
 ```
 
+<!-- TODO(#15): game controls are not documented -->
+
 ## References
 
 - https://en.wikipedia.org/wiki/Mode_13h
