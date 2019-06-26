@@ -123,7 +123,8 @@ draw_frame:
     neg word [ball_dx]
 .ball_x_col:
 
-    ;; TODO: No game over when ball hits the ground
+    ;; TODO(#16): No game over when ball hits the ground
+
     ;; if (ball_y <= 0 || ball_y >= HEIGHT - BALL_HEIGHT) {
     ;;   ball_dy = -ball_dy;
     ;; }
@@ -154,6 +155,7 @@ draw_frame:
 .ball_y_col:
 
     ;; TODO: Sometimes the bar gets stuck in a wall
+
     ;; if (bar_x <= 0 || bar_x >= WIDTH - BAR_WIDTH) {
     ;;   bar_dx = -bar_dx;
     ;; }
