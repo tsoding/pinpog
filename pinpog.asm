@@ -52,11 +52,20 @@ entry:
     mov ah, 0x0
     int 0x16
 
-    mov ax, -1
-    sub ax, [bar_dx]
-    mov word [bar_dx], ax
+    cmp al, 'a'
+    jz .swipe_left
+
+    cmp al, 'd'
+    jz .swipe_right
 
     jmp .loop
+.swipe_left:
+    mov word [bar_dx], -10
+    jmp .loop
+.swipe_right:
+    mov word [bar_dx], 10
+    jmp .loop
+
 
 draw_frame:
     pusha
@@ -207,7 +216,7 @@ ball_dy: dw (-2)
 
 bar_x: dw 0
 bar_y: dw 0
-bar_dx: dw 100
+bar_dx: dw 10
 
 rect_x: dw 0xcccc
 rect_y: dw 0xcccc
