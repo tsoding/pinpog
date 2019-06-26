@@ -23,8 +23,11 @@
 
 %define BALL_WIDTH 10
 %define BALL_HEIGHT 10
+%define BALL_COLOR COLOR_YELLOW
+
 %define BAR_WIDTH 100
 %define BAR_HEIGHT BALL_HEIGHT
+%define BAR_COLOR COLOR_LIGHTBLUE
 
 entry:
     mov ah, 0x00
@@ -48,7 +51,10 @@ entry:
 
     mov ah, 0x0
     int 0x16
-    neg word [ball_dx]
+
+    mov ax, -1
+    sub ax, [bar_dx]
+    mov word [bar_dx], ax
 
     jmp .loop
 
@@ -63,12 +69,18 @@ draw_frame:
 
     mov word [rect_width], BALL_WIDTH
     mov word [rect_height], BALL_HEIGHT
-
     mov ax, word [ball_x]
     mov word [rect_x], ax
     mov ax, word [ball_y]
     mov word [rect_y], ax
+    mov ch, BACKGROUND_COLOR
+    call fill_rect
 
+    mov word [rect_width], BAR_WIDTH
+    mov word [rect_height], BAR_HEIGHT
+    mov ax, [bar_x]
+    mov [rect_x], ax
+    mov word [rect_y], HEIGHT - 20
     mov ch, BACKGROUND_COLOR
     call fill_rect
 
@@ -100,29 +112,36 @@ draw_frame:
     neg word [ball_dy]
 .vercol_end:
 
+    ;; ball_x += ball_dx
     mov ax, [ball_x]
     add ax, [ball_dx]
     mov [ball_x], ax
 
+    ;; ball_y += ball_dy
     mov ax, [ball_y]
     add ax, [ball_dy]
     mov [ball_y], ax
 
+    ;; bar_x += bar_dx
+    mov ax, [bar_x]
+    add ax, [bar_dx]
+    mov [bar_x], ax
+
+    mov word [rect_width], BALL_WIDTH
+    mov word [rect_height], BALL_HEIGHT
     mov ax, word [ball_x]
     mov word [rect_x], ax
     mov ax, word [ball_y]
     mov word [rect_y], ax
-
-    mov ch, COLOR_LIGHTGREEN
+    mov ch, BALL_COLOR
     call fill_rect
 
-    mov ax, BAR_WIDTH
-    mov [rect_width], ax
-    mov ax, BAR_HEIGHT
-    mov [rect_height], ax
-    mov word [rect_x], 10
+    mov word [rect_width], BAR_WIDTH
+    mov word [rect_height], BAR_HEIGHT
+    mov ax, [bar_x]
+    mov [rect_x], ax
     mov word [rect_y], HEIGHT - 20
-    mov ch, COLOR_LIGHTGREEN
+    mov ch, BAR_COLOR
     call fill_rect
 
     popa
@@ -185,8 +204,10 @@ ball_x: dw 30
 ball_y: dw 30
 ball_dx: dw 2
 ball_dy: dw (-2)
+
 bar_x: dw 0
 bar_y: dw 0
+bar_dx: dw 100
 
 rect_x: dw 0xcccc
 rect_y: dw 0xcccc
