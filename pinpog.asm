@@ -32,7 +32,7 @@
 %define BAR_COLOR COLOR_LIGHTBLUE
 
 entry:
-    mov ah, 0x00
+    xor ah, ah
     ; VGA mode 0x13
     ; 320x200 256 colors
     mov al, 0x13
@@ -51,7 +51,7 @@ entry:
     int 0x16
     jz .loop
 
-    mov ah, 0x0
+    xor ah, ah
     int 0x16
 
     cmp al, 'a'
@@ -83,7 +83,7 @@ entry:
 draw_frame:
     pusha
 
-    mov ax, 0x0000
+    xor ax, ax
     mov ds, ax
 
     mov ax, 0xA000
@@ -234,7 +234,7 @@ fill_screen:
 fill_rect:
     ;; ch - color
 
-    mov ax, 0x0000
+    xor ax, ax
     mov ds, ax
 
     mov word [y], 0
