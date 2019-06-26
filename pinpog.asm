@@ -23,6 +23,8 @@
 
 %define BALL_WIDTH 10
 %define BALL_HEIGHT 10
+%define BAR_WIDTH 100
+%define BAR_HEIGHT BALL_HEIGHT
 
 entry:
     mov ah, 0x00
@@ -111,7 +113,16 @@ draw_frame:
     mov ax, word [ball_y]
     mov word [rect_y], ax
 
-    mov ch, 0x0A
+    mov ch, COLOR_LIGHTGREEN
+    call fill_rect
+
+    mov ax, BAR_WIDTH
+    mov [rect_width], ax
+    mov ax, BAR_HEIGHT
+    mov [rect_height], ax
+    mov word [rect_x], 10
+    mov word [rect_y], HEIGHT - 20
+    mov ch, COLOR_LIGHTGREEN
     call fill_rect
 
     popa
