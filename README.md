@@ -12,7 +12,7 @@ $ nix-shell   # For NixOS
 $ make
 ```
 
-<!-- TODO: game controls are not documented -->
+<!-- TODO(#15): game controls are not documented -->
 
 ## References
 
