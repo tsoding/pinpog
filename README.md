@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/tsoding/pinpog.svg?branch=master)](https://travis-ci.org/tsoding/pinpog)
+
 # PinPog
 
 Our goal is to write a game that fits into 512 bytes bootloader and
