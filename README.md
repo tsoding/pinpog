@@ -4,6 +4,9 @@ Our goal is to write a game that fits into 512 bytes bootloader and
 works in 16 bit real mode on any IBM PC compatible machine without any
 Operating System.
 
+- Development is done on https://twitch.tv/tsoding
+- Archive of the streams: https://www.twitch.tv/collections/VAcjkyTlqRVXuA
+
 ## Dependencies
 
 - [nasm]
