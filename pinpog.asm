@@ -120,7 +120,6 @@ draw_frame:
     neg word [ball_dx]
 .ball_x_col:
 
-    ;; TODO(#16): No game over when ball hits the ground
 
     ;; if (ball_y <= 0 || ball_y >= HEIGHT - BALL_HEIGHT) {
     ;;   ball_dy = -ball_dy;
