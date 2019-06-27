@@ -1,4 +1,4 @@
-.PHONE: all
+.PHONY: all
 all: pinpog
 	qemu-system-i386 pinpog
 
