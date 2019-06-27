@@ -23,5 +23,12 @@ $ make
 - https://en.wikipedia.org/wiki/Mode_13h
 - http://www.ctyme.com/intr/int.htm
 
+## Support
+
+You can support my work via
+
+- Twitch channel: https://www.twitch.tv/subs/tsoding
+- Patreon: https://www.patreon.com/tsoding
+
 [nasm]: https://www.nasm.us/
 [qemu]: https://www.qemu.org/
