@@ -21,7 +21,6 @@ $ nix-shell   # For NixOS
 $ make
 ```
 
-<!-- TODO(#15): game controls are not documented -->
 
 ## Controls
 
