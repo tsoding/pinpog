@@ -265,7 +265,6 @@ fill_rect:
 x: dw 0xcccc
 y: dw 0xcccc
 
-;; TODO(#10): Introduce bar at the bottom that is controlled by the player
 ;; TODO(#18): Game does not keep track of the score
 ;;   Every bar hit should give you points
 ;; TODO(#19): Game does not get harder over time
