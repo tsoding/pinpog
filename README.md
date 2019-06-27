@@ -23,9 +23,9 @@ $ make
 
 ## Controls
 
-Use `a` and `d` to move racket sideways.
-You can pause and unpause game by pressing `space`.
-If you've lost, press `space` to restart the game.
+- Use `a` and `d` to move racket sideways.
+- You can pause and unpause game by pressing `space`.
+- If you've lost, press `space` to restart the game.
 
 ## References
 
