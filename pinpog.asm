@@ -31,6 +31,8 @@
 %define BAR_HEIGHT BALL_HEIGHT
 %define BAR_COLOR COLOR_LIGHTBLUE
 
+%define VGA_OFFSET 0xA000
+
 entry:
     xor ah, ah
     ; VGA mode 0x13
@@ -38,13 +40,14 @@ entry:
     mov al, 0x13
     int 0x10
 
-    mov ch, BACKGROUND_COLOR
+    mov al, BACKGROUND_COLOR
     call fill_screen
 
-    xor ax, ax
-    mov es, ax
-    mov word [es:0x0070], draw_frame
-    mov word [es:0x0072], 0x00
+    ;; TODO(#29): draw_frame should be the only timer handler
+    ;;   That will make it easier to initialize all of the regs and flags
+    ;;   at the beginning of the frame and don't care about them in any
+    ;;   other subroutines.
+    mov dword [0x0070], draw_frame
 
 .loop:
     mov ah, 0x1
@@ -71,13 +74,13 @@ entry:
     mov word [bar_dx], 10
     jmp .loop
 .toggle_pause:
-    mov ax, word [es:0x0070]
+    mov ax, word [0x0070]
     cmp ax, do_nothing
     jz .unpause
-    mov word [es:0x0070], do_nothing
+    mov word [0x0070], do_nothing
     jmp .loop
 .unpause:
-    mov word [es:0x0070], draw_frame
+    mov word [0x0070], draw_frame
     jmp .loop
 
 draw_frame:
@@ -86,7 +89,7 @@ draw_frame:
     xor ax, ax
     mov ds, ax
 
-    mov ax, 0xA000
+    mov ax, VGA_OFFSET
     mov es, ax
 
     mov word [rect_width], BALL_WIDTH
@@ -139,9 +142,7 @@ draw_frame:
     jge .neg_ball_dy
     jmp .ball_y_col
 .game_over:
-    xor ax, ax
-    mov es, ax
-    mov word [es:0x0070], game_over
+    mov word [0x0070], game_over
 .neg_ball_dy:
     neg word [ball_dy]
 .ball_y_col:
@@ -197,7 +198,7 @@ do_nothing:
 ;; TODO(#24): there is no "Game Over" sign in the Game Over state
 game_over:
     pusha
-    mov ch, COLOR_RED
+    mov al, COLOR_RED
     call fill_screen
     popa
     iret
@@ -206,16 +207,11 @@ fill_screen:
     ;; ch - color
     pusha
 
-    mov ax, 0xA000
-    mov es, ax
-
-;; TODO(#9): could be rewritten with rep stuff
-    xor bx, bx
-.loop:
-    mov BYTE [es: bx], ch
-    inc bx
-    cmp bx, WIDTH * HEIGHT
-    jb .loop
+    mov bx, VGA_OFFSET
+    mov es, bx
+    xor di, di
+    mov cx, WIDTH * HEIGHT
+    rep stosb
 
     popa
     ret
@@ -224,36 +220,25 @@ fill_rect:
     ;; ch - color
     ;; si - pointer to ball_x or bar_x
 
-    xor ax, ax
-    mov ds, ax
-
-    mov word [y], 0
-.y:
-    mov word [x], 0
-.x:
     mov ax, WIDTH
-    mov bx, [y]
-    add bx, [si + 2]
-    mul bx
-    mov bx, ax
-    add bx, [x]
-    add bx, [si]
-    mov BYTE [es: bx], ch
+    xor di, di
+    add di, [si + 2]
+    mul di
+    mov di, ax
+    add di, [si]
 
-    inc word [x]
-    mov dx, [rect_width]
-    cmp [x], dx
-    jb .x
-
-    inc word [y]
-    mov dx, [rect_height]
-    cmp [y], dx
-    jb .y
+    mov al, ch
+    mov bx, [rect_height]
+.row:
+    ; (y + rect_y) * WIDTH + rect_x
+    mov cx, [rect_width]
+    rep stosb
+    sub di, [rect_width]
+    add di, WIDTH
+    dec bx
+    jnz .row
 
     ret
-
-x: dw 0xcccc
-y: dw 0xcccc
 
 ;; TODO(#18): Game does not keep track of the score
 ;;   Every bar hit should give you points
