@@ -43,6 +43,10 @@ entry:
     mov al, BACKGROUND_COLOR
     call fill_screen
 
+    ;; TODO: draw_frame should be the only timer handler
+    ;;   That will make it easier to initialize all of the regs and flags
+    ;;   at the beginning of the frame and don't care about them in any
+    ;;   other subroutines.
     mov dword [0x0070], draw_frame
 
 .loop:
@@ -204,7 +208,6 @@ fill_screen:
     pusha
 
     mov bx, VGA_OFFSET
-    ;; TODO: is it possible to set VGA_OFFSET to es once and forget about it?
     mov es, bx
     xor di, di
     mov cx, WIDTH * HEIGHT
@@ -217,36 +220,25 @@ fill_rect:
     ;; ch - color
     ;; si - pointer to ball_x or bar_x
 
-    xor ax, ax
-    mov ds, ax
-
-    mov word [y], 0
-.y:
-    mov word [x], 0
-.x:
     mov ax, WIDTH
-    mov bx, [y]
-    add bx, [si + 2]
-    mul bx
-    mov bx, ax
-    add bx, [x]
-    add bx, [si]
-    mov BYTE [es: bx], ch
+    xor di, di
+    add di, [si + 2]
+    mul di
+    mov di, ax
+    add di, [si]
 
-    inc word [x]
-    mov dx, [rect_width]
-    cmp [x], dx
-    jb .x
-
-    inc word [y]
-    mov dx, [rect_height]
-    cmp [y], dx
-    jb .y
+    mov al, ch
+    mov bx, [rect_height]
+.row:
+    ; (y + rect_y) * WIDTH + rect_x
+    mov cx, [rect_width]
+    rep stosb
+    sub di, [rect_width]
+    add di, WIDTH
+    dec bx
+    jnz .row
 
     ret
-
-x: dw 0xcccc
-y: dw 0xcccc
 
 ;; TODO(#18): Game does not keep track of the score
 ;;   Every bar hit should give you points
