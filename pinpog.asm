@@ -93,16 +93,16 @@ draw_frame:
     jmp [state]
 
 running_state:
-    mov word [rect_width], BALL_WIDTH
-    mov word [rect_height], BALL_HEIGHT
+    mov al, BACKGROUND_COLOR
+
+    mov cx, BALL_WIDTH
+    mov bx, BALL_HEIGHT
     mov si, ball_x
-    mov ch, BACKGROUND_COLOR
     call fill_rect
 
-    mov word [rect_width], BAR_WIDTH
-    mov word [rect_height], BAR_HEIGHT
+    mov cx, BAR_WIDTH
+    mov bx, BAR_HEIGHT
     mov si, bar_x
-    mov ch, BACKGROUND_COLOR
     call fill_rect
 
     ;; if (ball_x <= 0 || ball_x >= WIDTH - BALL_WIDTH) {
@@ -112,9 +112,7 @@ running_state:
     jle .neg_ball_dx
 
     cmp word [ball_x], WIDTH - BALL_WIDTH
-    jge .neg_ball_dx
-
-    jmp .ball_x_col
+    jl .ball_x_col
 .neg_ball_dx:
     neg word [ball_dx]
 .ball_x_col:
@@ -164,30 +162,27 @@ running_state:
 .bar_x_col:
 
     ;; ball_x += ball_dx
-    mov ax, [ball_x]
-    add ax, [ball_dx]
-    mov [ball_x], ax
+    mov ax, [ball_dx]
+    add [ball_x], ax
 
     ;; ball_y += ball_dy
-    mov ax, [ball_y]
-    add ax, [ball_dy]
-    mov [ball_y], ax
+    mov ax, [ball_dy]
+    add [ball_y], ax
 
     ;; bar_x += bar_dx
-    mov ax, [bar_x]
-    add ax, [bar_dx]
-    mov [bar_x], ax
+    mov ax, [bar_dx]
+    add [bar_x], ax
 
-    mov word [rect_width], BALL_WIDTH
-    mov word [rect_height], BALL_HEIGHT
+    mov cx, BALL_WIDTH
+    mov bx, BALL_HEIGHT
     mov si, ball_x
-    mov ch, BALL_COLOR
+    mov al, BALL_COLOR
     call fill_rect
 
-    mov word [rect_width], BAR_WIDTH
-    mov word [rect_height], BAR_HEIGHT
+    mov cx, BAR_WIDTH
+    mov bx, BAR_HEIGHT
     mov si, bar_x
-    mov ch, BAR_COLOR
+    mov al, BAR_COLOR
     call fill_rect
 
 pause_state:
@@ -214,23 +209,26 @@ fill_screen:
     ret
 
 fill_rect:
-    ;; ch - color
+    ;; al - color
+    ;; cx - width
+    ;; bx - height
     ;; si - pointer to ball_x or bar_x
 
+    ; di = (y + rect_y) * WIDTH + rect_x
+    push ax
     mov ax, WIDTH
     xor di, di
     add di, [si + 2]
     mul di
     mov di, ax
+    pop ax
     add di, [si]
 
-    mov al, ch
-    mov bx, [rect_height]
 .row:
-    ; (y + rect_y) * WIDTH + rect_x
-    mov cx, [rect_width]
+    push cx
     rep stosb
-    sub di, [rect_width]
+    pop cx
+    sub di, cx
     add di, WIDTH
     dec bx
     jnz .row
@@ -249,9 +247,6 @@ ball_dy: dw -BALL_VELOCITY
 bar_x: dw 10
 bar_y: dw HEIGHT - BAR_Y
 bar_dx: dw 10
-
-rect_width: dw 0xcccc
-rect_height: dw 0xcccc
 
     times 510 - ($-$$) db 0
     dw 0xaa55
