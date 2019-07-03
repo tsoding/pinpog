@@ -112,9 +112,7 @@ running_state:
     jle .neg_ball_dx
 
     cmp word [ball_x], WIDTH - BALL_WIDTH
-    jge .neg_ball_dx
-
-    jmp .ball_x_col
+    jl .ball_x_col
 .neg_ball_dx:
     neg word [ball_dx]
 .ball_x_col:
