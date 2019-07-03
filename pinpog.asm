@@ -94,13 +94,13 @@ draw_frame:
 
 running_state:
     mov word [rect_width], BALL_WIDTH
-    mov word [rect_height], BALL_HEIGHT
+    mov bx, BALL_HEIGHT
     mov si, ball_x
     mov ch, BACKGROUND_COLOR
     call fill_rect
 
     mov word [rect_width], BAR_WIDTH
-    mov word [rect_height], BAR_HEIGHT
+    mov bx, BAR_HEIGHT
     mov si, bar_x
     mov ch, BACKGROUND_COLOR
     call fill_rect
@@ -179,13 +179,13 @@ running_state:
     mov [bar_x], ax
 
     mov word [rect_width], BALL_WIDTH
-    mov word [rect_height], BALL_HEIGHT
+    mov bx, BALL_HEIGHT
     mov si, ball_x
     mov ch, BALL_COLOR
     call fill_rect
 
     mov word [rect_width], BAR_WIDTH
-    mov word [rect_height], BAR_HEIGHT
+    mov bx, BAR_HEIGHT
     mov si, bar_x
     mov ch, BAR_COLOR
     call fill_rect
@@ -215,6 +215,7 @@ fill_screen:
 
 fill_rect:
     ;; ch - color
+    ;; bx - height?
     ;; si - pointer to ball_x or bar_x
 
     mov ax, WIDTH
@@ -225,7 +226,6 @@ fill_rect:
     add di, [si]
 
     mov al, ch
-    mov bx, [rect_height]
 .row:
     ; (y + rect_y) * WIDTH + rect_x
     mov cx, [rect_width]
@@ -251,7 +251,6 @@ bar_y: dw HEIGHT - BAR_Y
 bar_dx: dw 10
 
 rect_width: dw 0xcccc
-rect_height: dw 0xcccc
 
     times 510 - ($-$$) db 0
     dw 0xaa55
