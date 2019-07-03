@@ -31,6 +31,8 @@
 %define BAR_HEIGHT BALL_HEIGHT
 %define BAR_COLOR COLOR_LIGHTBLUE
 
+%define VGA_OFFSET 0xA000
+
 entry:
     xor ah, ah
     ; VGA mode 0x13
@@ -86,7 +88,7 @@ draw_frame:
     xor ax, ax
     mov ds, ax
 
-    mov ax, 0xA000
+    mov ax, VGA_OFFSET
     mov es, ax
 
     mov word [rect_width], BALL_WIDTH
@@ -206,16 +208,14 @@ fill_screen:
     ;; ch - color
     pusha
 
-    mov ax, 0xA000
+    mov ax, VGA_OFFSET
+    ;; TODO: is it possible to set VGA_OFFSET to es once and forget about it?
     mov es, ax
-
-;; TODO(#9): could be rewritten with rep stuff
-    xor bx, bx
-.loop:
-    mov BYTE [es: bx], ch
-    inc bx
-    cmp bx, WIDTH * HEIGHT
-    jb .loop
+    xor di, di
+    ;; TODO: can you just pass color via AL?
+    mov al, ch
+    mov cx, WIDTH * HEIGHT
+    rep stosb
 
     popa
     ret
