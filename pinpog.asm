@@ -93,16 +93,16 @@ draw_frame:
     jmp [state]
 
 running_state:
+    mov al, BACKGROUND_COLOR
+
     mov cx, BALL_WIDTH
     mov bx, BALL_HEIGHT
     mov si, ball_x
-    mov al, BACKGROUND_COLOR
     call fill_rect
 
     mov cx, BAR_WIDTH
     mov bx, BAR_HEIGHT
     mov si, bar_x
-    mov al, BACKGROUND_COLOR
     call fill_rect
 
     ;; if (ball_x <= 0 || ball_x >= WIDTH - BALL_WIDTH) {
@@ -219,6 +219,7 @@ fill_rect:
     ;; bx - height
     ;; si - pointer to ball_x or bar_x
 
+    ; di = (y + rect_y) * WIDTH + rect_x
     push ax
     mov ax, WIDTH
     xor di, di
@@ -229,7 +230,6 @@ fill_rect:
     add di, [si]
 
 .row:
-    ; (y + rect_y) * WIDTH + rect_x
     push cx
     rep stosb
     pop cx
