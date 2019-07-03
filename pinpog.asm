@@ -40,7 +40,7 @@ entry:
     mov al, 0x13
     int 0x10
 
-    mov ch, BACKGROUND_COLOR
+    mov al, BACKGROUND_COLOR
     call fill_screen
 
     xor ax, ax
@@ -199,7 +199,7 @@ do_nothing:
 ;; TODO(#24): there is no "Game Over" sign in the Game Over state
 game_over:
     pusha
-    mov ch, COLOR_RED
+    mov al, COLOR_RED
     call fill_screen
     popa
     iret
@@ -208,12 +208,10 @@ fill_screen:
     ;; ch - color
     pusha
 
-    mov ax, VGA_OFFSET
+    mov bx, VGA_OFFSET
     ;; TODO: is it possible to set VGA_OFFSET to es once and forget about it?
-    mov es, ax
+    mov es, bx
     xor di, di
-    ;; TODO: can you just pass color via AL?
-    mov al, ch
     mov cx, WIDTH * HEIGHT
     rep stosb
 
