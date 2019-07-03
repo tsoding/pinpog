@@ -43,7 +43,7 @@ entry:
     mov al, BACKGROUND_COLOR
     call fill_screen
 
-    ;; TODO: draw_frame should be the only timer handler
+    ;; TODO(#29): draw_frame should be the only timer handler
     ;;   That will make it easier to initialize all of the regs and flags
     ;;   at the beginning of the frame and don't care about them in any
     ;;   other subroutines.
