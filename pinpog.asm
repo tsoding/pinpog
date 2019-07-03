@@ -93,16 +93,16 @@ draw_frame:
     jmp [state]
 
 running_state:
-    mov word [rect_width], BALL_WIDTH
+    mov cx, BALL_WIDTH
     mov bx, BALL_HEIGHT
     mov si, ball_x
-    mov ch, BACKGROUND_COLOR
+    mov al, BACKGROUND_COLOR
     call fill_rect
 
-    mov word [rect_width], BAR_WIDTH
+    mov cx, BAR_WIDTH
     mov bx, BAR_HEIGHT
     mov si, bar_x
-    mov ch, BACKGROUND_COLOR
+    mov al, BACKGROUND_COLOR
     call fill_rect
 
     ;; if (ball_x <= 0 || ball_x >= WIDTH - BALL_WIDTH) {
@@ -178,16 +178,16 @@ running_state:
     add ax, [bar_dx]
     mov [bar_x], ax
 
-    mov word [rect_width], BALL_WIDTH
+    mov cx, BALL_WIDTH
     mov bx, BALL_HEIGHT
     mov si, ball_x
-    mov ch, BALL_COLOR
+    mov al, BALL_COLOR
     call fill_rect
 
-    mov word [rect_width], BAR_WIDTH
+    mov cx, BAR_WIDTH
     mov bx, BAR_HEIGHT
     mov si, bar_x
-    mov ch, BAR_COLOR
+    mov al, BAR_COLOR
     call fill_rect
 
 pause_state:
@@ -214,23 +214,26 @@ fill_screen:
     ret
 
 fill_rect:
-    ;; ch - color
-    ;; bx - height?
+    ;; al - color
+    ;; cx - width
+    ;; bx - height
     ;; si - pointer to ball_x or bar_x
 
+    push ax
     mov ax, WIDTH
     xor di, di
     add di, [si + 2]
     mul di
     mov di, ax
+    pop ax
     add di, [si]
 
-    mov al, ch
 .row:
     ; (y + rect_y) * WIDTH + rect_x
-    mov cx, [rect_width]
+    push cx
     rep stosb
-    sub di, [rect_width]
+    pop cx
+    sub di, cx
     add di, WIDTH
     dec bx
     jnz .row
