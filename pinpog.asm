@@ -40,13 +40,11 @@ entry:
     mov al, 0x13
     int 0x10
 
+    mov ax, VGA_OFFSET
+    mov es, ax
     mov al, BACKGROUND_COLOR
     call fill_screen
 
-    ;; TODO(#29): draw_frame should be the only timer handler
-    ;;   That will make it easier to initialize all of the regs and flags
-    ;;   at the beginning of the frame and don't care about them in any
-    ;;   other subroutines.
     mov dword [0x0070], draw_frame
 
 .loop:
@@ -74,13 +72,13 @@ entry:
     mov word [bar_dx], 10
     jmp .loop
 .toggle_pause:
-    mov ax, word [0x0070]
-    cmp ax, do_nothing
+    mov ax, [state]
+    cmp ax, pause_state
     jz .unpause
-    mov word [0x0070], do_nothing
+    mov word [state], pause_state
     jmp .loop
 .unpause:
-    mov word [0x0070], draw_frame
+    mov word [state], running_state
     jmp .loop
 
 draw_frame:
@@ -92,6 +90,9 @@ draw_frame:
     mov ax, VGA_OFFSET
     mov es, ax
 
+    jmp [state]
+
+running_state:
     mov word [rect_width], BALL_WIDTH
     mov word [rect_height], BALL_HEIGHT
     mov si, ball_x
@@ -118,7 +119,6 @@ draw_frame:
     neg word [ball_dx]
 .ball_x_col:
 
-
     ;; if (ball_y <= 0 || ball_y >= HEIGHT - BALL_HEIGHT) {
     ;;   ball_dy = -ball_dy;
     ;; }
@@ -142,7 +142,7 @@ draw_frame:
     jge .neg_ball_dy
     jmp .ball_y_col
 .game_over:
-    mov word [0x0070], game_over
+    mov word [state], game_over_state
 .neg_ball_dy:
     neg word [ball_dy]
 .ball_y_col:
@@ -190,14 +190,13 @@ draw_frame:
     mov ch, BAR_COLOR
     call fill_rect
 
+pause_state:
     popa
-do_nothing:
     iret
 
 ;; TODO(#23): no proper way to restart the game when you are in game over state
 ;; TODO(#24): there is no "Game Over" sign in the Game Over state
-game_over:
-    pusha
+game_over_state:
     mov al, COLOR_RED
     call fill_screen
     popa
@@ -207,8 +206,6 @@ fill_screen:
     ;; ch - color
     pusha
 
-    mov bx, VGA_OFFSET
-    mov es, bx
     xor di, di
     mov cx, WIDTH * HEIGHT
     rep stosb
@@ -243,6 +240,7 @@ fill_rect:
 ;; TODO(#18): Game does not keep track of the score
 ;;   Every bar hit should give you points
 ;; TODO(#19): Game does not get harder over time
+state: dw running_state
 ball_x: dw 30
 ball_y: dw 30
 ball_dx: dw BALL_VELOCITY
