@@ -91,18 +91,13 @@ draw_frame:
 
     mov word [rect_width], BALL_WIDTH
     mov word [rect_height], BALL_HEIGHT
-    mov ax, word [ball_x]
-    mov word [rect_x], ax
-    mov ax, word [ball_y]
-    mov word [rect_y], ax
+    mov si, ball_x
     mov ch, BACKGROUND_COLOR
     call fill_rect
 
     mov word [rect_width], BAR_WIDTH
     mov word [rect_height], BAR_HEIGHT
-    mov ax, [bar_x]
-    mov [rect_x], ax
-    mov word [rect_y], HEIGHT - BAR_Y
+    mov si, bar_x
     mov ch, BACKGROUND_COLOR
     call fill_rect
 
@@ -184,18 +179,13 @@ draw_frame:
 
     mov word [rect_width], BALL_WIDTH
     mov word [rect_height], BALL_HEIGHT
-    mov ax, word [ball_x]
-    mov word [rect_x], ax
-    mov ax, word [ball_y]
-    mov word [rect_y], ax
+    mov si, ball_x
     mov ch, BALL_COLOR
     call fill_rect
 
     mov word [rect_width], BAR_WIDTH
     mov word [rect_height], BAR_HEIGHT
-    mov ax, [bar_x]
-    mov [rect_x], ax
-    mov word [rect_y], HEIGHT - BAR_Y
+    mov si, bar_x
     mov ch, BAR_COLOR
     call fill_rect
 
@@ -232,6 +222,7 @@ fill_screen:
 
 fill_rect:
     ;; ch - color
+    ;; si - pointer to ball_x or bar_x
 
     xor ax, ax
     mov ds, ax
@@ -242,11 +233,11 @@ fill_rect:
 .x:
     mov ax, WIDTH
     mov bx, [y]
-    add bx, [rect_y]
+    add bx, [si + 2]
     mul bx
     mov bx, ax
     add bx, [x]
-    add bx, [rect_x]
+    add bx, [si]
     mov BYTE [es: bx], ch
 
     inc word [x]
@@ -273,11 +264,9 @@ ball_dx: dw BALL_VELOCITY
 ball_dy: dw -BALL_VELOCITY
 
 bar_x: dw 10
-bar_y: dw 0
+bar_y: dw HEIGHT - BAR_Y
 bar_dx: dw 10
 
-rect_x: dw 0xcccc
-rect_y: dw 0xcccc
 rect_width: dw 0xcccc
 rect_height: dw 0xcccc
 
