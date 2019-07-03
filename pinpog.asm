@@ -253,8 +253,6 @@ bar_x: dw 10
 bar_y: dw HEIGHT - BAR_Y
 bar_dx: dw 10
 
-rect_width: dw 0xcccc
-
     times 510 - ($-$$) db 0
     dw 0xaa55
 
