@@ -162,19 +162,16 @@ running_state:
 .bar_x_col:
 
     ;; ball_x += ball_dx
-    mov ax, [ball_x]
-    add ax, [ball_dx]
-    mov [ball_x], ax
+    mov ax, [ball_dx]
+    add [ball_x], ax
 
     ;; ball_y += ball_dy
-    mov ax, [ball_y]
-    add ax, [ball_dy]
-    mov [ball_y], ax
+    mov ax, [ball_dy]
+    add [ball_y], ax
 
     ;; bar_x += bar_dx
-    mov ax, [bar_x]
-    add ax, [bar_dx]
-    mov [bar_x], ax
+    mov ax, [bar_dx]
+    add [bar_x], ax
 
     mov cx, BALL_WIDTH
     mov bx, BALL_HEIGHT
