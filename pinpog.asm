@@ -1,4 +1,7 @@
-    org 0x7C00
+[map symbols pinpog.map]
+
+START equ 0x7C00
+    org START
 %define WIDTH 320
 %define HEIGHT 200
 
@@ -248,9 +251,12 @@ bar_x: dw 10
 bar_y: dw HEIGHT - BAR_Y
 bar_dx: dw 10
 
+END:
     times 510 - ($-$$) db 0
     dw 0xaa55
 
     %if $ - $$ != 512
         %fatal Resulting size is not 512
     %endif
+
+SIZE equ END - START
