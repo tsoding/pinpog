@@ -1,0 +1,3 @@
+size2x=$(xxd -p pinpog | tr -d '\n' | pcregrep -o1 -i '^([0-9a-f]+?)[c]*55aa$' | wc -c)
+echo $(($size2x / 2))
+

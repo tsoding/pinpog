@@ -248,7 +248,7 @@ bar_x: dw 10
 bar_y: dw HEIGHT - BAR_Y
 bar_dx: dw 10
 
-    times 510 - ($-$$) db 0
+    times 510 - ($-$$) db 0xCC
     dw 0xaa55
 
     %if $ - $$ != 512
