@@ -214,14 +214,8 @@ fill_rect:
     ;; bx - height
     ;; si - pointer to ball_x or bar_x
 
-    ; di = (y + rect_y) * WIDTH + rect_x
-    push ax
-    mov ax, WIDTH
-    xor di, di
-    add di, [si + 2]
-    mul di
-    mov di, ax
-    pop ax
+    ; di = rect_y * WIDTH + rect_x
+    imul di, [si + 2], WIDTH
     add di, [si]
 
 .row:
