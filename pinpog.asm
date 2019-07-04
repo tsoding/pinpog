@@ -75,20 +75,19 @@ entry:
     mov word [bar_dx], 10
     jmp .loop
 .toggle_pause:
-    mov ax, [state]
-    cmp ax, pause_state
-    jz .unpause
-    mov word [state], pause_state
-    jmp .loop
-.unpause:
-    mov word [state], running_state
+; next_state = running_state + pause_state - current_state
+; nasm cannot evaluate states_sum properly let's help him:
+states_sum equ running_state + pause_state + START + START
+    mov ax, states_sum
+    sub ax, [state]
+    mov [state], ax             
     jmp .loop
 
 draw_frame:
     pusha
 
-    xor ax, ax
-    mov ds, ax
+    push cs
+    pop ds
 
     mov ax, VGA_OFFSET
     mov es, ax
@@ -220,9 +219,7 @@ fill_rect:
     ; di = (y + rect_y) * WIDTH + rect_x
     push ax
     mov ax, WIDTH
-    xor di, di
-    add di, [si + 2]
-    mul di
+    mul word [si + 2]
     mov di, ax
     pop ax
     add di, [si]
@@ -241,6 +238,7 @@ fill_rect:
 ;; TODO(#18): Game does not keep track of the score
 ;;   Every bar hit should give you points
 ;; TODO(#19): Game does not get harder over time
+align 2
 state: dw running_state
 ball_x: dw 30
 ball_y: dw 30
