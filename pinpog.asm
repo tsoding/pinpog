@@ -200,14 +200,12 @@ game_over_state:
     iret
 
 fill_screen:
-    ;; ch - color
-    pusha
+    ;; al - color
 
     xor di, di
     mov cx, WIDTH * HEIGHT
     rep stosb
 
-    popa
     ret
 
 fill_rect:
