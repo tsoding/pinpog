@@ -33,6 +33,8 @@
 
 %define VGA_OFFSET 0xA000
 
+%define SCORE_DIGIT_COUNT 5
+
 entry:
     xor ah, ah
     ; VGA mode 0x13
@@ -85,16 +87,28 @@ draw_frame:
     pusha
 
     xor ax, ax
+    mov ds, ax
+
+    mov si, SCORE_DIGIT_COUNT
+    mov ax, [score_value]
+    mov cx, 10
+.loop:
+    xor dx, dx
+    div cx
+    add dl, '0'
+    dec si
+    mov byte [score_svalue + si], dl
+    jnz .loop
+
+;; TODO: Background and foreground colors of score_sign don't fit the game
+    xor ax, ax
     mov es, ax
     mov ax, 0x1300
     mov bx, 0x0064
-    mov cl, [sup_len]
+    mov cl, [score_sign_len]
     xor dx, dx
-    mov bp, sup
+    mov bp, score_sign
     int 10h
-
-    xor ax, ax
-    mov ds, ax
 
     mov ax, VGA_OFFSET
     mov es, ax
@@ -153,7 +167,7 @@ running_state:
     popa
     iret
 .score_point:
-    inc word [score]
+    inc word [score_value]
 .neg_ball_dy:
     neg word [ball_dy]
 .ball_y_col:
@@ -204,6 +218,7 @@ pause_state:
 
 ;; TODO(#23): no proper way to restart the game when you are in game over state
 ;; TODO(#24): there is no "Game Over" sign in the Game Over state
+;; TODO: the score sign is flickering in Game Over state
 game_over_state:
     mov al, COLOR_RED
     call fill_screen
@@ -255,10 +270,12 @@ bar_x: dw 10
 bar_y: dw HEIGHT - BAR_Y
 bar_dx: dw 10
 
-score: dw 0
+score_value: dw 0
 
-sup: db "Sup Sailor"
-sup_len: db ($ - sup)
+;; sign = label + svalue
+score_sign: db "Score: "
+score_svalue: times SCORE_DIGIT_COUNT db 0
+score_sign_len: db ($ - score_sign)
 
 %assign sizeOfProgram $ - $$
 %warning Size of the program: sizeOfProgram bytes
