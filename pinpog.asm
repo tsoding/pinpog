@@ -85,6 +85,15 @@ draw_frame:
     pusha
 
     xor ax, ax
+    mov es, ax
+    mov ax, 0x1300
+    mov bx, 0x0064
+    mov cl, [sup_len]
+    xor dx, dx
+    mov bp, sup
+    int 10h
+
+    xor ax, ax
     mov ds, ax
 
     mov ax, VGA_OFFSET
@@ -247,6 +256,9 @@ bar_y: dw HEIGHT - BAR_Y
 bar_dx: dw 10
 
 score: dw 0
+
+sup: db "Sup Sailor"
+sup_len: db ($ - sup)
 
 %assign sizeOfProgram $ - $$
 %warning Size of the program: sizeOfProgram bytes
