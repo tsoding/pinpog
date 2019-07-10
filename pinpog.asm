@@ -242,6 +242,9 @@ bar_x: dw 10
 bar_y: dw HEIGHT - BAR_Y
 bar_dx: dw 10
 
+%assign sizeOfProgram $ - $$
+%warning Size of the sizeOfProgram
+
     times 510 - ($-$$) db 0
     dw 0xaa55
 
