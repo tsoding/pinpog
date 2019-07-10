@@ -218,7 +218,7 @@ pause_state:
 
 ;; TODO(#23): no proper way to restart the game when you are in game over state
 ;; TODO(#24): there is no "Game Over" sign in the Game Over state
-;; TODO: the score sign is flickering in Game Over state
+;; TODO(#43): the score sign is flickering in Game Over state
 game_over_state:
     mov al, COLOR_RED
     call fill_screen
