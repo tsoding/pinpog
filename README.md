@@ -33,6 +33,7 @@ $ make
 
 - https://en.wikipedia.org/wiki/Mode_13h
 - http://www.ctyme.com/intr/int.htm
+- https://board.flatassembler.net/topic.php?t=14914
 
 ## Support
 
