@@ -51,7 +51,6 @@ endstruc
 
 entry:
     mov dword [0x0070], draw_frame
-.restart:
     ; VGA mode 0x13
     ; 320x200 256 colors
 
@@ -77,7 +76,7 @@ entry:
 
     mov bx, [game_state + GameState.state]
     cmp bx, game_over_state
-    jz .restart
+    jz entry
 
     cmp al, 'a'
     jz .swipe_left
