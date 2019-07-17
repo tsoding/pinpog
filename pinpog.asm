@@ -26,7 +26,6 @@
 %define BALL_VELOCITY 4
 %define BALL_COLOR COLOR_YELLOW
 
-%define BAR_WIDTH 100
 %define BAR_Y 50
 %define BAR_HEIGHT BALL_HEIGHT
 %define BAR_COLOR COLOR_LIGHTBLUE
@@ -123,7 +122,7 @@ running_state:
     mov si, ball_x
     call fill_rect
 
-    mov cx, BAR_WIDTH
+    movzx cx, byte [bar_len]
     mov bx, BAR_HEIGHT
     mov si, bar_x
     call fill_rect
@@ -155,7 +154,9 @@ running_state:
     jg .ball_y_col
 
     sub bx, word [bar_x]
-    cmp bx, BAR_WIDTH - BALL_WIDTH
+    movzx ax, byte [bar_len]
+    sub ax, BALL_WIDTH
+    cmp bx, ax
     jg .ball_y_col
 
     ;; ball_y >= HEIGHT - BALL_HEIGHT - BAR_Y
@@ -168,6 +169,8 @@ running_state:
     iret
 .score_point:
     inc word [score_value]
+    ;; TODO: bar_len can potentially become negative
+    sub byte [bar_len], 1
 .neg_ball_dy:
     neg word [ball_dy]
 .ball_y_col:
@@ -180,7 +183,10 @@ running_state:
     cmp word [bar_x], 0
     jle .neg_bar_dx
 
-    cmp word [bar_x], WIDTH - BAR_WIDTH
+    movzx ax, byte [bar_len]
+    neg ax
+    add ax, WIDTH
+    cmp word [bar_x], ax
     jge .neg_bar_dx
 
     jmp .bar_x_col
@@ -206,7 +212,7 @@ running_state:
     mov al, BALL_COLOR
     call fill_rect
 
-    mov cx, BAR_WIDTH
+    movzx cx, byte [bar_len]
     mov bx, BAR_HEIGHT
     mov si, bar_x
     mov al, BAR_COLOR
@@ -269,6 +275,7 @@ ball_dy: dw -BALL_VELOCITY
 bar_x: dw 10
 bar_y: dw HEIGHT - BAR_Y
 bar_dx: dw 10
+bar_len: db 100
 
 score_value: dw 0
 
