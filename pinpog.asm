@@ -34,6 +34,21 @@
 
 %define SCORE_DIGIT_COUNT 5
 
+sizeof(GameState)
+
+struc GameState
+  .state: resw 1
+  .ball_x: resw 1
+  .ball_y: resw 1
+  .ball_dx: resw 1
+  .ball_dy: resw 1
+  .bar_x: resw 1
+  .bar_y: resw 1
+  .bar_dx: resw 1
+  .bar_len: resb 1
+  .score_value: resw 1
+endstruc
+
 entry:
     xor ah, ah
     ; VGA mode 0x13
@@ -52,7 +67,7 @@ entry:
     xor ah, ah
     int 0x16
 
-    mov bx, [state]
+    mov bx, [game_state + GameState.state]
     cmp bx, game_over_state
     jz .restart
 
@@ -67,19 +82,19 @@ entry:
 
     jmp .loop
 .swipe_left:
-    mov word [bar_dx], -10
+    mov word [game_state + GameState.bar_dx], -10
     jmp .loop
 .swipe_right:
-    mov word [bar_dx], 10
+    mov word [game_state + GameState.bar_dx], 10
     jmp .loop
 .toggle_pause:
-    mov ax, [state]
+    mov ax, [game_state + GameState.state]
     cmp ax, pause_state
     jz .unpause
-    mov word [state], pause_state
+    mov word [game_state + GameState.state], pause_state
     jmp .loop
 .unpause:
-    mov word [state], running_state
+    mov word [game_state + GameState.state], running_state
     jmp .loop
 .restart:
     mov ax, VGA_OFFSET
@@ -87,16 +102,17 @@ entry:
     mov al, BACKGROUND_COLOR
     call fill_screen
 
-    mov word [state], running_state
-    mov word [ball_x], 30
-    mov word [ball_y], 30
-    mov word [ball_dx], BALL_VELOCITY
-    mov word [ball_dy], -BALL_VELOCITY
-    mov word [bar_x], 10
-    mov word [bar_y], HEIGHT - BAR_INITIAL_Y
-    mov word [bar_dx], 10
-    mov byte [bar_len], 100
-    mov word [score_value], 0
+    ;; TODO: collapse this into a single "memcpy"
+    mov word [game_state + GameState.state], running_state
+    mov word [game_state + GameState.ball_x], 30
+    mov word [game_state + GameState.ball_y], 30
+    mov word [game_state + GameState.ball_dx], BALL_VELOCITY
+    mov word [game_state + GameState.ball_dy], -BALL_VELOCITY
+    mov word [game_state + GameState.bar_x], 10
+    mov word [game_state + GameState.bar_y], HEIGHT - BAR_INITIAL_Y
+    mov word [game_state + GameState.bar_dx], 10
+    mov byte [game_state + GameState.bar_len], 100
+    mov word [game_state + GameState.score_value], 0
     jmp .loop
 
 draw_frame:
@@ -106,7 +122,7 @@ draw_frame:
     mov ds, ax
 
     mov si, SCORE_DIGIT_COUNT
-    mov ax, [score_value]
+    mov ax, [game_state + GameState.score_value]
     mov cx, 10
 .loop:
     xor dx, dx
@@ -129,71 +145,71 @@ draw_frame:
     mov ax, VGA_OFFSET
     mov es, ax
 
-    jmp [state]
+    jmp [game_state + GameState.state]
 
 running_state:
     mov al, BACKGROUND_COLOR
 
     mov cx, BALL_WIDTH
     mov bx, BALL_HEIGHT
-    mov si, ball_x
+    mov si, game_state + GameState.ball_x
     call fill_rect
 
-    movzx cx, byte [bar_len]
+    movzx cx, byte [game_state + GameState.bar_len]
     mov bx, BAR_HEIGHT
-    mov si, bar_x
+    mov si, game_state + GameState.bar_x
     call fill_rect
 
     ;; if (ball_x <= 0 || ball_x >= WIDTH - BALL_WIDTH) {
     ;;   ball_dx = -ball_dx;
     ;; }
-    cmp word [ball_x], 0
+    cmp word [game_state + GameState.ball_x], 0
     jle .neg_ball_dx
 
-    cmp word [ball_x], WIDTH - BALL_WIDTH
+    cmp word [game_state + GameState.ball_x], WIDTH - BALL_WIDTH
     jl .ball_x_col
 .neg_ball_dx:
-    neg word [ball_dx]
+    neg word [game_state + GameState.ball_dx]
 .ball_x_col:
 
     ;; if (ball_y <= 0 || ball_y >= HEIGHT - BALL_HEIGHT) {
     ;;   ball_dy = -ball_dy;
     ;; }
-    cmp word [ball_y], 0
+    cmp word [game_state + GameState.ball_y], 0
     jle .neg_ball_dy
 
-    cmp word [ball_y], HEIGHT - BALL_HEIGHT
+    cmp word [game_state + GameState.ball_y], HEIGHT - BALL_HEIGHT
     jge .game_over
 
     ;; bar_x <= ball_x && ball_x - bar_x <= BAR_WIDTH - BALL_WIDTH
-    mov bx, word [ball_x]
-    cmp word [bar_x], bx
+    mov bx, word [game_state + GameState.ball_x]
+    cmp word [game_state + GameState.bar_x], bx
     jg .ball_y_col
 
-    sub bx, word [bar_x]
-    movzx ax, byte [bar_len]
+    sub bx, word [game_state + GameState.bar_x]
+    movzx ax, byte [game_state + GameState.bar_len]
     sub ax, BALL_WIDTH
     cmp bx, ax
     jg .ball_y_col
 
     ;; ball_y >= bar_y - BALL_HEIGHT
-    mov ax, [bar_y]
+    mov ax, [game_state + GameState.bar_y]
     sub ax, BALL_HEIGHT
-    cmp word [ball_y], ax
+    cmp word [game_state + GameState.ball_y], ax
     jge .score_point
     jmp .ball_y_col
 .game_over:
-    mov word [state], game_over_state
+    mov word [game_state + GameState.state], game_over_state
     popa
     iret
 .score_point:
-    inc word [score_value]
-    cmp byte [bar_len], 20
+    inc word [game_state + GameState.score_value]
+    cmp byte [game_state + GameState.bar_len], 20
     jle .neg_ball_dy
-    sub byte [bar_len], 1
+    sub byte [game_state + GameState.bar_len], 1
     ;; Fall through
 .neg_ball_dy:
-    neg word [ball_dy]
+    neg word [game_state + GameState.ball_dy]
 .ball_y_col:
 
     ;; TODO(#17): Sometimes the bar gets stuck in a wall
@@ -201,41 +217,41 @@ running_state:
     ;; if (bar_x <= 0 || bar_x >= WIDTH - BAR_WIDTH) {
     ;;   bar_dx = -bar_dx;
     ;; }
-    cmp word [bar_x], 0
+    cmp word [game_state + GameState.bar_x], 0
     jle .neg_bar_dx
 
-    movzx ax, byte [bar_len]
+    movzx ax, byte [game_state + GameState.bar_len]
     neg ax
     add ax, WIDTH
-    cmp word [bar_x], ax
+    cmp word [game_state + GameState.bar_x], ax
     jge .neg_bar_dx
 
     jmp .bar_x_col
 .neg_bar_dx:
-    neg word [bar_dx]
+    neg word [game_state + GameState.bar_dx]
 .bar_x_col:
 
     ;; ball_x += ball_dx
-    mov ax, [ball_dx]
-    add [ball_x], ax
+    mov ax, [game_state + GameState.ball_dx]
+    add [game_state + GameState.ball_x], ax
 
     ;; ball_y += ball_dy
-    mov ax, [ball_dy]
-    add [ball_y], ax
+    mov ax, [game_state + GameState.ball_dy]
+    add [game_state + GameState.ball_y], ax
 
     ;; bar_x += bar_dx
-    mov ax, [bar_dx]
-    add [bar_x], ax
+    mov ax, [game_state + GameState.bar_dx]
+    add [game_state + GameState.bar_x], ax
 
     mov cx, BALL_WIDTH
     mov bx, BALL_HEIGHT
-    mov si, ball_x
+    mov si, game_state + GameState.ball_x
     mov al, BALL_COLOR
     call fill_rect
 
-    movzx cx, byte [bar_len]
+    movzx cx, byte [game_state + GameState.bar_len]
     mov bx, BAR_HEIGHT
-    mov si, bar_x
+    mov si, game_state + GameState.bar_x
     mov al, BAR_COLOR
     call fill_rect
 
@@ -287,18 +303,18 @@ fill_rect:
 ;; TODO(#18): Game does not keep track of the score
 ;;   Every bar hit should give you points
 ;; TODO(#19): Game does not get harder over time
-state: dw running_state
-ball_x: dw 30
-ball_y: dw 30
-ball_dx: dw BALL_VELOCITY
-ball_dy: dw -BALL_VELOCITY
-
-bar_x: dw 10
-bar_y: dw HEIGHT - BAR_INITIAL_Y
-bar_dx: dw 10
-bar_len: db 100
-
-score_value: dw 0
+;; TODO: initial_game_state should probably initialized using istruc mechanism
+initial_game_state:
+_state: dw running_state
+_ball_x: dw 30
+_ball_y: dw 30
+_ball_dx: dw BALL_VELOCITY
+_ball_dy: dw -BALL_VELOCITY
+_bar_x: dw 10
+_bar_y: dw HEIGHT - BAR_INITIAL_Y
+_bar_dx: dw 10
+_bar_len: db 100
+_score_value: dw 0
 
 ;; sign = label + svalue
 score_sign: db "Score: "
@@ -309,6 +325,7 @@ score_sign_len: db ($ - score_sign)
 %warning Size of the program: sizeOfProgram bytes
 
     times 510 - ($-$$) db 0
+game_state:
     dw 0xaa55
 
     %if $ - $$ != 512
