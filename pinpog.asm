@@ -1,6 +1,8 @@
     org 0x7C00
 %define WIDTH 320
 %define HEIGHT 200
+%define COLUMNS 40
+%define ROWS 25
 
 %define COLOR_BLACK 0
 %define COLOR_BLUE 1
@@ -48,15 +50,23 @@ struc GameState
 endstruc
 
 entry:
-    xor ah, ah
+    mov dword [0x0070], draw_frame
+.restart:
     ; VGA mode 0x13
     ; 320x200 256 colors
+
+    xor ah, ah
     mov al, 0x13
     int 0x10
 
-    mov dword [0x0070], draw_frame
+    xor ax, ax
+    mov es, ax
+    mov ds, ax
+    mov cx, GameState_size
+    mov si, initial_game_state
+    mov di, game_state
+    rep movsb
 
-    jmp .restart
 .loop:
     mov ah, 0x1
     int 0x16
@@ -94,15 +104,6 @@ entry:
 .unpause:
     mov word [game_state + GameState.state], running_state
     jmp .loop
-.restart:
-    xor ax, ax
-    mov es, ax
-    mov ds, ax
-    mov cx, GameState_size
-    mov si, initial_game_state
-    mov di, game_state
-    rep movsb
-    jmp .loop
 
 draw_frame:
     pusha
@@ -126,7 +127,7 @@ draw_frame:
     mov es, ax
     mov ax, 0x1300
     mov bx, 0x0064
-    mov cl, [score_sign_len]
+    mov cl, score_sign_len
     xor dx, dx
     mov bp, score_sign
     int 10h
@@ -188,7 +189,18 @@ running_state:
     jge .score_point
     jmp .ball_y_col
 .game_over:
+    xor ax, ax
+    mov es, ax
+    mov ax, 0x1300
+    mov bx, 0x0064
+    xor ch, ch
+    mov cl, game_over_sign_len
+    mov dl, ROWS / 2
+    mov dh, COLUMNS / 2 - game_over_sign_len
+    mov bp, game_over_sign
+    int 10h
     mov word [game_state + GameState.state], game_over_state
+
     popa
     iret
 .score_point:
@@ -293,7 +305,10 @@ _score_value: dw 0
 ;; sign = label + svalue
 score_sign: db "Score: "
 score_svalue: times SCORE_DIGIT_COUNT db 0
-score_sign_len: db ($ - score_sign)
+score_sign_len equ $ - score_sign
+
+game_over_sign: db "Game Over"
+game_over_sign_len equ $ - game_over_sign
 
 %assign sizeOfProgram $ - $$
 %warning Size of the program: sizeOfProgram bytes
