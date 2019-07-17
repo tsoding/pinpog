@@ -119,7 +119,6 @@ draw_frame:
     mov byte [score_svalue + si], dl
     jnz .loop
 
-;; TODO(#42): Background and foreground colors of score_sign don't fit the game
     xor ax, ax
     mov es, ax
     mov ax, 0x1300
