@@ -41,13 +41,9 @@ entry:
     mov al, 0x13
     int 0x10
 
-    mov ax, VGA_OFFSET
-    mov es, ax
-    mov al, BACKGROUND_COLOR
-    call fill_screen
-
     mov dword [0x0070], draw_frame
 
+    jmp .restart
 .loop:
     mov ah, 0x1
     int 0x16
@@ -55,6 +51,10 @@ entry:
 
     xor ah, ah
     int 0x16
+
+    mov bx, [state]
+    cmp bx, game_over_state
+    jz .restart
 
     cmp al, 'a'
     jz .swipe_left
@@ -80,6 +80,23 @@ entry:
     jmp .loop
 .unpause:
     mov word [state], running_state
+    jmp .loop
+.restart:
+    mov ax, VGA_OFFSET
+    mov es, ax
+    mov al, BACKGROUND_COLOR
+    call fill_screen
+
+    mov word [state], running_state
+    mov word [ball_x], 30
+    mov word [ball_y], 30
+    mov word [ball_dx], BALL_VELOCITY
+    mov word [ball_dy], -BALL_VELOCITY
+    mov word [bar_x], 10
+    mov word [bar_y], HEIGHT - BAR_INITIAL_Y
+    mov word [bar_dx], 10
+    mov byte [bar_len], 100
+    mov word [score_value], 0
     jmp .loop
 
 draw_frame:
