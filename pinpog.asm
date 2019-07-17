@@ -171,8 +171,10 @@ running_state:
     iret
 .score_point:
     inc word [score_value]
-    ;; TODO: bar_len can potentially become negative
+    cmp byte [bar_len], 20
+    jle .neg_ball_dy
     sub byte [bar_len], 1
+    ;; Fall through
 .neg_ball_dy:
     neg word [ball_dy]
 .ball_y_col:
