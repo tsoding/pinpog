@@ -173,8 +173,6 @@ running_state:
     inc word [score_value]
     ;; TODO: bar_len can potentially become negative
     sub byte [bar_len], 1
-    ;; TODO: increasing bar_y causes positive feedback loop that keeps scoring points
-    sub word [bar_y], 1
 .neg_ball_dy:
     neg word [ball_dy]
 .ball_y_col:
