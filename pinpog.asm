@@ -26,7 +26,7 @@
 %define BALL_VELOCITY 4
 %define BALL_COLOR COLOR_YELLOW
 
-%define BAR_Y 50
+%define BAR_INITIAL_Y 50
 %define BAR_HEIGHT BALL_HEIGHT
 %define BAR_COLOR COLOR_LIGHTBLUE
 
@@ -159,8 +159,10 @@ running_state:
     cmp bx, ax
     jg .ball_y_col
 
-    ;; ball_y >= HEIGHT - BALL_HEIGHT - BAR_Y
-    cmp word [ball_y], HEIGHT - BALL_HEIGHT - BAR_Y
+    ;; ball_y >= bar_y - BALL_HEIGHT
+    mov ax, [bar_y]
+    sub ax, BALL_HEIGHT
+    cmp word [ball_y], ax
     jge .score_point
     jmp .ball_y_col
 .game_over:
@@ -171,6 +173,8 @@ running_state:
     inc word [score_value]
     ;; TODO: bar_len can potentially become negative
     sub byte [bar_len], 1
+    ;; TODO: increasing bar_y causes positive feedback loop that keeps scoring points
+    sub word [bar_y], 1
 .neg_ball_dy:
     neg word [ball_dy]
 .ball_y_col:
@@ -273,7 +277,7 @@ ball_dx: dw BALL_VELOCITY
 ball_dy: dw -BALL_VELOCITY
 
 bar_x: dw 10
-bar_y: dw HEIGHT - BAR_Y
+bar_y: dw HEIGHT - BAR_INITIAL_Y
 bar_dx: dw 10
 bar_len: db 100
 
