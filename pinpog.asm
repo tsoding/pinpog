@@ -285,7 +285,6 @@ fill_rect:
 
 ;; TODO(#18): Game does not keep track of the score
 ;;   Every bar hit should give you points
-;; TODO(#19): Game does not get harder over time
 ;; TODO(#46): initial_game_state should probably initialized using istruc mechanism
 initial_game_state:
 _state: dw running_state
