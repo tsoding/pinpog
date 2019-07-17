@@ -19,7 +19,7 @@
 %define COLOR_YELLOW 14
 %define COLOR_WHITE 15
 
-%define BACKGROUND_COLOR COLOR_DARKGRAY
+%define BACKGROUND_COLOR COLOR_BLACK
 
 %define BALL_WIDTH 10
 %define BALL_HEIGHT 10
@@ -95,11 +95,6 @@ entry:
     mov word [game_state + GameState.state], running_state
     jmp .loop
 .restart:
-    mov ax, VGA_OFFSET
-    mov es, ax
-    mov al, BACKGROUND_COLOR
-    call fill_screen
-
     xor ax, ax
     mov es, ax
     mov ds, ax
@@ -249,29 +244,14 @@ running_state:
     mov al, BAR_COLOR
     call fill_rect
 
-pause_state:
-    popa
-    iret
-
 ;; TODO(#23): no proper way to restart the game when you are in game over state
 ;; TODO(#24): there is no "Game Over" sign in the Game Over state
 ;; TODO(#43): the score sign is flickering in Game Over state
 game_over_state:
-    mov al, COLOR_RED
-    call fill_screen
+    nop
+pause_state:
     popa
     iret
-
-fill_screen:
-    ;; ch - color
-    pusha
-
-    xor di, di
-    mov cx, WIDTH * HEIGHT
-    rep stosb
-
-    popa
-    ret
 
 fill_rect:
     ;; al - color
