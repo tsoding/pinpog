@@ -50,12 +50,9 @@ struc GameState
 endstruc
 
 entry:
-    mov dword [0x0070], draw_frame
     ; VGA mode 0x13
     ; 320x200 256 colors
-
-    xor ah, ah
-    mov al, 0x13
+    mov ax, 0x13
     int 0x10
 
     xor ax, ax
@@ -66,6 +63,7 @@ entry:
     mov di, game_state
     rep movsb
 
+    mov dword [0x0070], draw_frame
 .loop:
     mov ah, 0x1
     int 0x16
