@@ -283,8 +283,6 @@ fill_rect:
 
     ret
 
-;; TODO(#18): Game does not keep track of the score
-;;   Every bar hit should give you points
 ;; TODO(#46): initial_game_state should probably initialized using istruc mechanism
 initial_game_state:
 _state: dw running_state
