@@ -254,7 +254,6 @@ running_state:
     call fill_rect
 
 ;; TODO(#24): there is no "Game Over" sign in the Game Over state
-;; TODO(#43): the score sign is flickering in Game Over state
 game_over_state:
     nop
 pause_state:
