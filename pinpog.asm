@@ -253,7 +253,6 @@ running_state:
     mov al, BAR_COLOR
     call fill_rect
 
-;; TODO(#24): there is no "Game Over" sign in the Game Over state
 game_over_state:
     nop
 pause_state:
