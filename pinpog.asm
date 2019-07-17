@@ -34,8 +34,6 @@
 
 %define SCORE_DIGIT_COUNT 5
 
-sizeof(GameState)
-
 struc GameState
   .state: resw 1
   .ball_x: resw 1
@@ -102,17 +100,13 @@ entry:
     mov al, BACKGROUND_COLOR
     call fill_screen
 
-    ;; TODO: collapse this into a single "memcpy"
-    mov word [game_state + GameState.state], running_state
-    mov word [game_state + GameState.ball_x], 30
-    mov word [game_state + GameState.ball_y], 30
-    mov word [game_state + GameState.ball_dx], BALL_VELOCITY
-    mov word [game_state + GameState.ball_dy], -BALL_VELOCITY
-    mov word [game_state + GameState.bar_x], 10
-    mov word [game_state + GameState.bar_y], HEIGHT - BAR_INITIAL_Y
-    mov word [game_state + GameState.bar_dx], 10
-    mov byte [game_state + GameState.bar_len], 100
-    mov word [game_state + GameState.score_value], 0
+    xor ax, ax
+    mov es, ax
+    mov ds, ax
+    mov cx, GameState_size
+    mov si, initial_game_state
+    mov di, game_state
+    rep movsb
     jmp .loop
 
 draw_frame:
