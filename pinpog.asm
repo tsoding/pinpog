@@ -1,6 +1,8 @@
     org 0x7C00
 %define WIDTH 320
 %define HEIGHT 200
+%define COLUMNS 40
+%define ROWS 25
 
 %define COLOR_BLACK 0
 %define COLOR_BLUE 1
@@ -19,7 +21,7 @@
 %define COLOR_YELLOW 14
 %define COLOR_WHITE 15
 
-%define BACKGROUND_COLOR COLOR_DARKGRAY
+%define BACKGROUND_COLOR COLOR_BLACK
 
 %define BALL_WIDTH 10
 %define BALL_HEIGHT 10
@@ -48,15 +50,20 @@ struc GameState
 endstruc
 
 entry:
-    xor ah, ah
     ; VGA mode 0x13
     ; 320x200 256 colors
-    mov al, 0x13
+    mov ax, 0x13
     int 0x10
 
-    mov dword [0x0070], draw_frame
+    xor ax, ax
+    mov es, ax
+    mov ds, ax
+    mov cx, GameState_size
+    mov si, initial_game_state
+    mov di, game_state
+    rep movsb
 
-    jmp .restart
+    mov dword [0x0070], draw_frame
 .loop:
     mov ah, 0x1
     int 0x16
@@ -67,7 +74,7 @@ entry:
 
     mov bx, [game_state + GameState.state]
     cmp bx, game_over_state
-    jz .restart
+    jz entry
 
     cmp al, 'a'
     jz .swipe_left
@@ -94,20 +101,6 @@ entry:
 .unpause:
     mov word [game_state + GameState.state], running_state
     jmp .loop
-.restart:
-    mov ax, VGA_OFFSET
-    mov es, ax
-    mov al, BACKGROUND_COLOR
-    call fill_screen
-
-    xor ax, ax
-    mov es, ax
-    mov ds, ax
-    mov cx, GameState_size
-    mov si, initial_game_state
-    mov di, game_state
-    rep movsb
-    jmp .loop
 
 draw_frame:
     pusha
@@ -131,7 +124,7 @@ draw_frame:
     mov es, ax
     mov ax, 0x1300
     mov bx, 0x0064
-    mov cl, [score_sign_len]
+    mov cl, score_sign_len
     xor dx, dx
     mov bp, score_sign
     int 10h
@@ -193,7 +186,18 @@ running_state:
     jge .score_point
     jmp .ball_y_col
 .game_over:
+    xor ax, ax
+    mov es, ax
+    mov ax, 0x1300
+    mov bx, 0x0064
+    xor ch, ch
+    mov cl, game_over_sign_len
+    mov dl, ROWS / 2
+    mov dh, COLUMNS / 2 - game_over_sign_len
+    mov bp, game_over_sign
+    int 10h
     mov word [game_state + GameState.state], game_over_state
+
     popa
     iret
 .score_point:
@@ -249,29 +253,13 @@ running_state:
     mov al, BAR_COLOR
     call fill_rect
 
-pause_state:
-    popa
-    iret
-
-;; TODO(#23): no proper way to restart the game when you are in game over state
 ;; TODO(#24): there is no "Game Over" sign in the Game Over state
 ;; TODO(#43): the score sign is flickering in Game Over state
 game_over_state:
-    mov al, COLOR_RED
-    call fill_screen
+    nop
+pause_state:
     popa
     iret
-
-fill_screen:
-    ;; ch - color
-    pusha
-
-    xor di, di
-    mov cx, WIDTH * HEIGHT
-    rep stosb
-
-    popa
-    ret
 
 fill_rect:
     ;; al - color
@@ -294,9 +282,6 @@ fill_rect:
 
     ret
 
-;; TODO(#18): Game does not keep track of the score
-;;   Every bar hit should give you points
-;; TODO(#19): Game does not get harder over time
 ;; TODO(#46): initial_game_state should probably initialized using istruc mechanism
 initial_game_state:
 _state: dw running_state
@@ -313,7 +298,10 @@ _score_value: dw 0
 ;; sign = label + svalue
 score_sign: db "Score: "
 score_svalue: times SCORE_DIGIT_COUNT db 0
-score_sign_len: db ($ - score_sign)
+score_sign_len equ $ - score_sign
+
+game_over_sign: db "Game Over"
+game_over_sign_len equ $ - game_over_sign
 
 %assign sizeOfProgram $ - $$
 %warning Size of the program: sizeOfProgram bytes
