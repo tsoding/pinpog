@@ -211,24 +211,22 @@ running_state:
 
     ;; if (bar_x <= 0 || bar_x >= WIDTH - BAR_WIDTH) {
     ;;   bar_dx = -bar_dx;
+    ;;   bar_x = snap_to(side_it_collided_with);
     ;; }
-    cmp word [game_state + GameState.bar_x], 0
-    jle .bar_snap_left
+    xor ax, ax
+    cmp word [game_state + GameState.bar_x], ax
+    jle .neg_bar_dx
 
-    movzx ax, byte [game_state + GameState.bar_len]
+    mov al, byte [game_state + GameState.bar_len]
     neg ax
     add ax, WIDTH
     cmp word [game_state + GameState.bar_x], ax
-    jge .bar_snap_right
+    jge .neg_bar_dx
 
     jmp .bar_x_col
-.bar_snap_left:
-    mov word [game_state + GameState.bar_x], 0
-    jmp .neg_bar_dx
-.bar_snap_right:
-    mov word [game_state + GameState.bar_x], ax
 .neg_bar_dx:
     neg word [game_state + GameState.bar_dx]
+    mov word [game_state + GameState.bar_x], ax
 .bar_x_col:
 
     ;; ball_x += ball_dx
