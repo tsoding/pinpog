@@ -23,14 +23,15 @@
 
 %define BACKGROUND_COLOR COLOR_BLACK
 
-%define BALL_WIDTH 10
-%define BALL_HEIGHT 10
-%define BALL_VELOCITY 4
+%define BALL_WIDTH 16
+%define BALL_HEIGHT 16
+%define BALL_VELOCITY 6
 %define BALL_COLOR COLOR_YELLOW
 
 %define BAR_INITIAL_Y 50
-%define BAR_HEIGHT 2 * BALL_HEIGHT
+%define BAR_HEIGHT 3
 %define BAR_COLOR COLOR_LIGHTBLUE
+%define BAR_VELOCITY 10
 
 %define VGA_OFFSET 0xA000
 
@@ -87,10 +88,10 @@ entry:
 
     jmp .loop
 .swipe_left:
-    mov word [game_state + GameState.bar_dx], -10
+    mov word [game_state + GameState.bar_dx], - BAR_VELOCITY
     jmp .loop
 .swipe_right:
-    mov word [game_state + GameState.bar_dx], 10
+    mov word [game_state + GameState.bar_dx], BAR_VELOCITY
     jmp .loop
 .toggle_pause:
     mov ax, [game_state + GameState.state]
@@ -156,46 +157,7 @@ running_state:
     cmp word [game_state + GameState.ball_y], HEIGHT - BALL_HEIGHT
     jge .game_over
 
-    ;; bar_x <= ball_x && ball_x - bar_x <= BAR_WIDTH - BALL_WIDTH
-    mov bx, word [game_state + GameState.ball_x]
-    cmp word [game_state + GameState.bar_x], bx
-    jg .ball_y_col_end
-
-    sub bx, word [game_state + GameState.bar_x]
-    movzx ax, byte [game_state + GameState.bar_len]
-    sub ax, BALL_WIDTH
-    cmp bx, ax
-    jg .ball_y_col_end
-
-    ;; TODO(#58): Ball catching mechanics looks like bug
-    ;; ball_y <= bar_y + BAR_HEIGHT && ball_y >= bar_y - BALL_HEIGHT
-    mov ax, [game_state + GameState.bar_y]
-    add ax, BAR_HEIGHT
-    cmp word [game_state + GameState.ball_y], ax
-    jg .ball_y_col_end
-
-    mov ax, [game_state + GameState.bar_y]
-    sub ax, BALL_HEIGHT
-    cmp word [game_state + GameState.ball_y], ax
-    jge .score_point
     jmp .ball_y_col_end
-
-.score_point:
-    mov si, SCORE_DIGIT_COUNT
-.loop:
-    inc byte [game_state + GameState.score_sign + si - 1]
-    cmp byte [game_state + GameState.score_sign + si - 1], '9'
-    jle .end
-    mov byte [game_state + GameState.score_sign + si - 1], '0'
-    dec si
-    jz .end
-    jmp .loop
-.end:
-
-    cmp byte [game_state + GameState.bar_len], 20
-    jle .neg_ball_dy
-    sub byte [game_state + GameState.bar_len], 1
-    ;; Fall through
 .neg_ball_dy:
     neg word [game_state + GameState.ball_dy]
 .ball_y_col_end:
@@ -219,6 +181,64 @@ running_state:
     neg word [game_state + GameState.bar_dx]
     mov word [game_state + GameState.bar_x], ax
 .bar_x_col:
+
+
+;;; Kebab Begin ------------------------------
+    ;; bar_x <= ball_x && ball_x - bar_x <= BAR_WIDTH - BALL_WIDTH
+    mov bx, word [game_state + GameState.ball_x]
+    cmp word [game_state + GameState.bar_x], bx
+    jg .unkebab
+
+    sub bx, word [game_state + GameState.bar_x]
+    movzx ax, byte [game_state + GameState.bar_len]
+    sub ax, BALL_WIDTH
+    cmp bx, ax
+    jg .unkebab
+
+    ; ball_y > bar_y => ignore
+    mov ax, [game_state + GameState.bar_y]
+    cmp word [game_state + GameState.ball_y], ax
+    jg .kebab_end
+
+    ; ball_y >= bar_y - BALL_HEIGHT / 2 => kebab
+    sub ax, BALL_HEIGHT / 2
+    cmp word [game_state + GameState.ball_y], ax
+    jge .kebab
+
+    ; ball_y >= bar_y - BALL_HEIGHT => bounce
+    sub ax, BALL_HEIGHT / 2
+    cmp word [game_state + GameState.ball_y], ax
+    jge .bounce
+    jmp .kebab_end
+
+.kebab:
+    mov word [game_state + GameState.ball_dy], 0
+    jmp .score_point
+.bounce:
+    mov word [game_state + GameState.ball_dy], -BALL_VELOCITY
+.score_point:
+    mov si, SCORE_DIGIT_COUNT
+.loop:
+    inc byte [game_state + GameState.score_sign + si - 1]
+    cmp byte [game_state + GameState.score_sign + si - 1], '9'
+    jle .end
+    mov byte [game_state + GameState.score_sign + si - 1], '0'
+    dec si
+    jz .end
+    jmp .loop
+.end:
+
+    cmp byte [game_state + GameState.bar_len], 20
+    jle .kebab_end
+    sub byte [game_state + GameState.bar_len], 1
+    jmp .kebab_end
+
+.unkebab:
+    cmp word [game_state + GameState.ball_dy], 0
+    jnz .kebab_end
+    mov word [game_state + GameState.ball_dy], -BALL_VELOCITY
+.kebab_end:
+;;; Kebab End ------------------------------
 
     ;; ball_x += ball_dx
     mov ax, [game_state + GameState.ball_dx]
@@ -291,7 +311,7 @@ _ball_dx: dw BALL_VELOCITY
 _ball_dy: dw -BALL_VELOCITY
 _bar_x: dw 10
 _bar_y: dw HEIGHT - BAR_INITIAL_Y
-_bar_dx: dw 10
+_bar_dx: dw BAR_VELOCITY
 _bar_len: db 100
 _score_svalue: times SCORE_DIGIT_COUNT db '0'
 
