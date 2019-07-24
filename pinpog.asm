@@ -191,8 +191,8 @@ running_state:
     mov bx, 0x0064
     xor ch, ch
     mov cl, game_over_sign_len
-    mov dl, ROWS / 2
-    mov dh, COLUMNS / 2 - game_over_sign_len
+    mov dh, ROWS / 2
+    mov dl, COLUMNS / 2 - game_over_sign_len / 2
     mov bp, game_over_sign
     int 10h
     mov word [game_state + GameState.state], game_over_state
