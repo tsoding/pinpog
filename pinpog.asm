@@ -29,7 +29,7 @@
 %define BALL_COLOR COLOR_YELLOW
 
 %define BAR_INITIAL_Y 50
-%define BAR_HEIGHT BALL_HEIGHT
+%define BAR_HEIGHT 2 * BALL_HEIGHT
 %define BAR_COLOR COLOR_LIGHTBLUE
 
 %define VGA_OFFSET 0xA000
@@ -125,14 +125,14 @@ draw_frame:
 running_state:
     mov al, BACKGROUND_COLOR
 
-    mov cx, BALL_WIDTH
-    mov bx, BALL_HEIGHT
-    mov si, game_state + GameState.ball_x
-    call fill_rect
-
     movzx cx, byte [game_state + GameState.bar_len]
     mov bx, BAR_HEIGHT
     mov si, game_state + GameState.bar_x
+    call fill_rect
+
+    mov cx, BALL_WIDTH
+    mov bx, BALL_HEIGHT
+    mov si, game_state + GameState.ball_x
     call fill_rect
 
     ;; if (ball_x <= 0 || ball_x >= WIDTH - BALL_WIDTH) {
@@ -142,10 +142,10 @@ running_state:
     jle .neg_ball_dx
 
     cmp word [game_state + GameState.ball_x], WIDTH - BALL_WIDTH
-    jl .ball_x_col
+    jl .ball_x_col_end
 .neg_ball_dx:
     neg word [game_state + GameState.ball_dx]
-.ball_x_col:
+.ball_x_col_end:
 
     ;; if (ball_y <= 0 || ball_y >= HEIGHT - BALL_HEIGHT) {
     ;;   ball_dy = -ball_dy;
@@ -159,20 +159,27 @@ running_state:
     ;; bar_x <= ball_x && ball_x - bar_x <= BAR_WIDTH - BALL_WIDTH
     mov bx, word [game_state + GameState.ball_x]
     cmp word [game_state + GameState.bar_x], bx
-    jg .ball_y_col
+    jg .ball_y_col_end
 
     sub bx, word [game_state + GameState.bar_x]
     movzx ax, byte [game_state + GameState.bar_len]
     sub ax, BALL_WIDTH
     cmp bx, ax
-    jg .ball_y_col
+    jg .ball_y_col_end
 
-    ;; ball_y >= bar_y - BALL_HEIGHT
+    ;; TODO: Ball catching mechanics looks like bug
+    ;; ball_y <= bar_y + BAR_HEIGHT && ball_y >= bar_y - BALL_HEIGHT
+    mov ax, [game_state + GameState.bar_y]
+    add ax, BAR_HEIGHT
+    cmp word [game_state + GameState.ball_y], ax
+    jg .ball_y_col_end
+
     mov ax, [game_state + GameState.bar_y]
     sub ax, BALL_HEIGHT
     cmp word [game_state + GameState.ball_y], ax
     jge .score_point
-    jmp .ball_y_col
+    jmp .ball_y_col_end
+
 .game_over:
     xor ax, ax
     mov es, ax
@@ -207,7 +214,7 @@ running_state:
     ;; Fall through
 .neg_ball_dy:
     neg word [game_state + GameState.ball_dy]
-.ball_y_col:
+.ball_y_col_end:
 
     ;; if (bar_x <= 0 || bar_x >= WIDTH - BAR_WIDTH) {
     ;;   bar_dx = -bar_dx;
@@ -243,16 +250,16 @@ running_state:
     mov ax, [game_state + GameState.bar_dx]
     add [game_state + GameState.bar_x], ax
 
-    mov cx, BALL_WIDTH
-    mov bx, BALL_HEIGHT
-    mov si, game_state + GameState.ball_x
-    mov al, BALL_COLOR
-    call fill_rect
-
     movzx cx, byte [game_state + GameState.bar_len]
     mov bx, BAR_HEIGHT
     mov si, game_state + GameState.bar_x
     mov al, BAR_COLOR
+    call fill_rect
+
+    mov cx, BALL_WIDTH
+    mov bx, BALL_HEIGHT
+    mov si, game_state + GameState.ball_x
+    mov al, BALL_COLOR
     call fill_rect
 
 game_over_state:
