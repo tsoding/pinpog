@@ -27,6 +27,7 @@ $ make
 ## Controls
 
 - `a`, `d` - move racket sideways,
+- `f` - restart the game,
 - `space` - toggle pause.
 
 ## References

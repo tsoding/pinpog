@@ -86,6 +86,9 @@ entry:
     cmp al, ' '
     jz .toggle_pause
 
+    cmp al, 'f'
+    jz entry
+
     jmp .loop
 .swipe_left:
     mov word [game_state + GameState.bar_dx], -10
