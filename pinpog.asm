@@ -73,10 +73,6 @@ entry:
     xor ah, ah
     int 0x16
 
-    mov bx, [game_state + GameState.state]
-    cmp bx, game_over_state
-    jz entry
-
     cmp al, 'a'
     jz .swipe_left
 
