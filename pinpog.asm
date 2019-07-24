@@ -94,9 +94,9 @@ entry:
     jmp .loop
 .toggle_pause:
     mov ax, [game_state + GameState.state]
-    cmp ax, pause_state
+    cmp ax, stop_state
     jz .unpause
-    mov word [game_state + GameState.state], pause_state
+    mov word [game_state + GameState.state], stop_state
     jmp .loop
 .unpause:
     mov word [game_state + GameState.state], running_state
@@ -180,22 +180,6 @@ running_state:
     jge .score_point
     jmp .ball_y_col_end
 
-.game_over:
-    xor ax, ax
-    mov es, ax
-    mov ax, 0x1300
-    mov bx, 0x0064
-    xor ch, ch
-    mov cl, game_over_sign_len
-    mov dh, ROWS / 2
-    mov dl, COLUMNS / 2 - game_over_sign_len / 2
-    mov bp, game_over_sign
-    int 10h
-    mov word [game_state + GameState.state], game_over_state
-
-    popa
-    iret
-
 .score_point:
     mov si, SCORE_DIGIT_COUNT
 .loop:
@@ -260,9 +244,20 @@ running_state:
     mov al, BALL_COLOR
     call fill_rect
 
-game_over_state:
-    nop
-pause_state:
+    jmp stop_state
+.game_over:
+    xor ax, ax
+    mov es, ax
+    mov ax, 0x1300
+    mov bx, 0x0064
+    xor ch, ch
+    mov cl, game_over_sign_len
+    mov dh, ROWS / 2
+    mov dl, COLUMNS / 2 - game_over_sign_len / 2
+    mov bp, game_over_sign
+    int 10h
+    mov word [game_state + GameState.state], stop_state
+stop_state:
     popa
     iret
 
