@@ -191,14 +191,14 @@ running_state:
 
 .score_point:
     mov si, SCORE_DIGIT_COUNT
-.loop1:
+.loop:
     inc byte [game_state + GameState.score_sign + si - 1]
     cmp byte [game_state + GameState.score_sign + si - 1], '9'
     jle .end
     mov byte [game_state + GameState.score_sign + si - 1], '0'
     dec si
     jz .end
-    jmp .loop1
+    jmp .loop
 .end:
 
     cmp byte [game_state + GameState.bar_len], 20
@@ -209,21 +209,24 @@ running_state:
     neg word [game_state + GameState.ball_dy]
 .ball_y_col:
 
-    ;; TODO(#17): Sometimes the bar gets stuck in a wall
-
     ;; if (bar_x <= 0 || bar_x >= WIDTH - BAR_WIDTH) {
     ;;   bar_dx = -bar_dx;
     ;; }
     cmp word [game_state + GameState.bar_x], 0
-    jle .neg_bar_dx
+    jle .bar_snap_left
 
     movzx ax, byte [game_state + GameState.bar_len]
     neg ax
     add ax, WIDTH
     cmp word [game_state + GameState.bar_x], ax
-    jge .neg_bar_dx
+    jge .bar_snap_right
 
     jmp .bar_x_col
+.bar_snap_left:
+    mov word [game_state + GameState.bar_x], 0
+    jmp .neg_bar_dx
+.bar_snap_right:
+    mov word [game_state + GameState.bar_x], ax
 .neg_bar_dx:
     neg word [game_state + GameState.bar_dx]
 .bar_x_col:
