@@ -65,6 +65,7 @@ entry:
 
     mov dword [0x0070], draw_frame
 .loop:
+    hlt
     mov ah, 0x1
     int 0x16
     jz .loop
