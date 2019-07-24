@@ -167,7 +167,7 @@ running_state:
     cmp bx, ax
     jg .ball_y_col_end
 
-    ;; TODO: Ball catching mechanics looks like bug
+    ;; TODO(#58): Ball catching mechanics looks like bug
     ;; ball_y <= bar_y + BAR_HEIGHT && ball_y >= bar_y - BALL_HEIGHT
     mov ax, [game_state + GameState.bar_y]
     add ax, BAR_HEIGHT
