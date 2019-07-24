@@ -46,7 +46,7 @@ struc GameState
   .bar_y: resw 1
   .bar_dx: resw 1
   .bar_len: resb 1
-  .score_value: resw 1
+  .score_sign resb SCORE_DIGIT_COUNT
 endstruc
 
 entry:
@@ -108,24 +108,13 @@ draw_frame:
     xor ax, ax
     mov ds, ax
 
-    mov si, SCORE_DIGIT_COUNT
-    mov ax, [game_state + GameState.score_value]
-    mov cx, 10
-.loop:
-    xor dx, dx
-    div cx
-    add dl, '0'
-    dec si
-    mov byte [score_svalue + si], dl
-    jnz .loop
-
     xor ax, ax
     mov es, ax
     mov ax, 0x1300
     mov bx, 0x0064
-    mov cl, score_sign_len
+    mov cl, SCORE_DIGIT_COUNT
     xor dx, dx
-    mov bp, score_sign
+    mov bp, game_state + GameState.score_sign
     int 10h
 
     mov ax, VGA_OFFSET
@@ -191,16 +180,27 @@ running_state:
     mov bx, 0x0064
     xor ch, ch
     mov cl, game_over_sign_len
-    mov dl, ROWS / 2
-    mov dh, COLUMNS / 2 - game_over_sign_len
+    mov dh, ROWS / 2
+    mov dl, COLUMNS / 2 - game_over_sign_len / 2
     mov bp, game_over_sign
     int 10h
     mov word [game_state + GameState.state], game_over_state
 
     popa
     iret
+
 .score_point:
-    inc word [game_state + GameState.score_value]
+    mov si, SCORE_DIGIT_COUNT
+.loop1:
+    inc byte [game_state + GameState.score_sign + si - 1]
+    cmp byte [game_state + GameState.score_sign + si - 1], '9'
+    jle .end
+    mov byte [game_state + GameState.score_sign + si - 1], '0'
+    dec si
+    jz .end
+    jmp .loop1
+.end:
+
     cmp byte [game_state + GameState.bar_len], 20
     jle .neg_ball_dy
     sub byte [game_state + GameState.bar_len], 1
@@ -290,12 +290,7 @@ _bar_x: dw 10
 _bar_y: dw HEIGHT - BAR_INITIAL_Y
 _bar_dx: dw 10
 _bar_len: db 100
-_score_value: dw 0
-
-;; sign = label + svalue
-score_sign: db "Score: "
-score_svalue: times SCORE_DIGIT_COUNT db 0
-score_sign_len equ $ - score_sign
+_score_svalue: times SCORE_DIGIT_COUNT db '0'
 
 game_over_sign: db "Game Over"
 game_over_sign_len equ $ - game_over_sign
