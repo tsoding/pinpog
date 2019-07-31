@@ -257,12 +257,12 @@ running_state:
 .game_over:
     xor ax, ax
     mov es, ax
-    mov ax, 0x1300
+    mov ah, 0x13
     mov bx, 0x0064
-    xor ch, ch
-    mov cl, game_over_sign_len
-    mov dh, ROWS / 2
-    mov dl, COLUMNS / 2 - game_over_sign_len / 2
+    ; ch = 0 ; cl = game_over_sign_len
+    mov cx, game_over_sign_len
+    ; dh = ROWS / 2 ; dl = COLUMNS / 2 - game_over_sign_len / 2
+    mov dx, (ROWS / 2) << 8 | (COLUMNS / 2 - game_over_sign_len / 2)
     mov bp, game_over_sign
     int 10h
     mov word [game_state + GameState.state], stop_state
