@@ -125,16 +125,8 @@ draw_frame:
 
 running_state:
     mov al, BACKGROUND_COLOR
-
-    movzx cx, byte [game_state + GameState.bar_len]
-    mov bx, BAR_HEIGHT
-    mov si, game_state + GameState.bar_x
-    call fill_rect
-
-    mov cx, BALL_WIDTH
-    mov bx, BALL_HEIGHT
-    mov si, game_state + GameState.ball_x
-    call fill_rect
+    call fill_bar
+    call fill_ball
 
     ;; if (ball_x <= 0 || ball_x >= WIDTH - BALL_WIDTH) {
     ;;   ball_dx = -ball_dx;
@@ -252,17 +244,11 @@ running_state:
     mov ax, [game_state + GameState.bar_dx]
     add [game_state + GameState.bar_x], ax
 
-    movzx cx, byte [game_state + GameState.bar_len]
-    mov bx, BAR_HEIGHT
-    mov si, game_state + GameState.bar_x
     mov al, BAR_COLOR
-    call fill_rect
+    call fill_bar
 
-    mov cx, BALL_WIDTH
-    mov bx, BALL_HEIGHT
-    mov si, game_state + GameState.ball_x
     mov al, BALL_COLOR
-    call fill_rect
+    call fill_ball
 
     jmp stop_state
 .game_over:
@@ -280,6 +266,17 @@ running_state:
 stop_state:
     popa
     iret
+
+fill_bar:
+    movzx cx, byte [game_state + GameState.bar_len]
+    mov bx, BAR_HEIGHT
+    mov si, game_state + GameState.bar_x
+    jmp fill_rect
+
+fill_ball:
+    mov cx, BALL_WIDTH
+    mov bx, BALL_HEIGHT
+    mov si, game_state + GameState.ball_x
 
 fill_rect:
     ;; al - color
