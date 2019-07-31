@@ -302,18 +302,19 @@ fill_rect:
 
     ret
 
-;; TODO(#46): initial_game_state should probably initialized using istruc mechanism
 initial_game_state:
-_state: dw running_state
-_ball_x: dw 30
-_ball_y: dw 30
-_ball_dx: dw BALL_VELOCITY
-_ball_dy: dw -BALL_VELOCITY
-_bar_x: dw 10
-_bar_y: dw HEIGHT - BAR_INITIAL_Y
-_bar_dx: dw BAR_VELOCITY
-_bar_len: db 100
-_score_svalue: times SCORE_DIGIT_COUNT db '0'
+istruc GameState
+  at GameState.state, dw running_state
+  at GameState.ball_x, dw 30
+  at GameState.ball_y, dw 30
+  at GameState.ball_dx, dw BALL_VELOCITY
+  at GameState.ball_dy, dw -BALL_VELOCITY
+  at GameState.bar_x, dw 10
+  at GameState.bar_y, dw HEIGHT - BAR_INITIAL_Y
+  at GameState.bar_dx, dw BAR_VELOCITY
+  at GameState.bar_len, db 100
+  at GameState.score_sign, times SCORE_DIGIT_COUNT db '0'
+iend
 
 game_over_sign: db "Game Over"
 game_over_sign_len equ $ - game_over_sign
