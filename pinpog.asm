@@ -165,9 +165,8 @@ running_state:
     neg ax
     add ax, WIDTH
     cmp word [game_state + GameState.bar_x], ax
-    jge .neg_bar_dx
+    jl .bar_x_col
 
-    jmp .bar_x_col
 .neg_bar_dx:
     neg word [game_state + GameState.bar_dx]
     mov word [game_state + GameState.bar_x], ax
