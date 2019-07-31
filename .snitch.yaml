@@ -1,0 +1,4 @@
+title:
+  transforms:
+    - match: (.*) \-\-\>
+      replace: $1

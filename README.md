@@ -23,6 +23,21 @@ $ nix-shell   # For NixOS
 $ make
 ```
 
+## Making Bootable USB stick
+
+**I AM NOT RESPONSIBLE FOR ANY DAMAGED HARDWARE. SEE LICENSE FOR MORE INFORMATION.**
+
+### Linux
+
+1. Build the image of the game: `$ make pinpog`
+1. Get a USB stick (at least 512 bytes Kappa)
+1. Plug it in
+1. Find the block device of the USB drive using something like [lsblk](https://linux.die.net/man/8/lsblk)
+1. Use [dd](https://linux.die.net/man/1/dd) to write the image to the USB drive: `sudo dd if=./pinpog of=/dev/<usb-drive>`
+
+### Windows
+
+<!-- TODO(#65): Bootable USB stick creation is not documented for Windows -->
 
 ## Controls
 
