@@ -46,6 +46,8 @@ $ qemu-system-i386 pinpog
 
 ### Windows
 
+[TBD](https://github.com/tsoding/pinpog/issues/65)
+
 <!-- TODO(#65): Bootable USB stick creation is not documented for Windows -->
 
 ## Controls
