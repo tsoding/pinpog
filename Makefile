@@ -11,10 +11,11 @@ pinpog: pinpog.asm
 
 dist: pinpog-$(VERSION).tgz pinpog-$(VERSION).zip
 
-pinpog-$(VERSION): pinpog README.release.md
+pinpog-$(VERSION): pinpog README.release.md LICENSE
 	mkdir pinpog-$(VERSION)
 	cp pinpog pinpog-$(VERSION)/
 	cp README.release.md pinpog-$(VERSION)/README.release.md
+	cp LICENSE pinpog-$(VERSION)/
 
 pinpog-$(VERSION).tgz: pinpog-$(VERSION)
 	tar fvc pinpog-$(VERSION).tgz pinpog-$(VERSION)/
