@@ -13,14 +13,23 @@ Operating System.
 
 ## Dependencies
 
+First install these programs:
+
 - [nasm]
 - [qemu]
 
 ## Quick Start
 
+### Build the game
+
 ```console
-$ nix-shell   # For NixOS
-$ make
+$ nasm pinpog.asm -o pinpog
+```
+
+### Run the game in QEMU
+
+```console
+$ qemu-system-i386 pinpog
 ```
 
 ## Making Bootable USB stick
