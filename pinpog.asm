@@ -131,26 +131,28 @@ running_state:
     ;; if (ball_x <= 0 || ball_x >= WIDTH - BALL_WIDTH) {
     ;;   ball_dx = -ball_dx;
     ;; }
-    cmp word [game_state + GameState.ball_x], 0
+    mov ax, word [game_state + GameState.ball_x]
+    cmp ax, 0
     jle .neg_ball_dx
 
-    cmp word [game_state + GameState.ball_x], WIDTH - BALL_WIDTH
+    cmp ax, WIDTH - BALL_WIDTH
     jl .ball_x_col_end
 .neg_ball_dx:
     neg word [game_state + GameState.ball_dx]
 .ball_x_col_end:
 
-    ;; if (ball_y <= 0 || ball_y >= HEIGHT - BALL_HEIGHT) {
+    ;; if (ball_y >= HEIGHT - BALL_HEIGHT) {
+    ;;   gameOver();
+    ;; } else if (ball_y <= 0) {
     ;;   ball_dy = -ball_dy;
     ;; }
-    cmp word [game_state + GameState.ball_y], 0
-    jle .neg_ball_dy
-
-    cmp word [game_state + GameState.ball_y], HEIGHT - BALL_HEIGHT
+    mov ax, word [game_state + GameState.ball_y]
+    cmp ax, HEIGHT - BALL_HEIGHT
     jge .game_over
 
-    jmp .ball_y_col_end
-.neg_ball_dy:
+    cmp ax, 0
+    jg .ball_y_col_end
+
     neg word [game_state + GameState.ball_dy]
 .ball_y_col_end:
 
