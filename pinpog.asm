@@ -208,6 +208,12 @@ running_state:
     jmp .score_point
 .bounce:
     mov word [game_state + GameState.ball_dy], -BALL_VELOCITY
+    mov word [game_state + GameState.ball_dx], BALL_VELOCITY
+    mov ax, word [game_state + GameState.bar_dx]
+    test ax, ax
+    jns .score_point
+    neg word [game_state + GameState.ball_dx]
+    ;; Fall through
 .score_point:
     mov si, SCORE_DIGIT_COUNT
 .loop:
