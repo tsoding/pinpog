@@ -37,7 +37,7 @@ $ make
 
 ### Windows
 
-<!-- TODO: Bootable USB stick creation is not documented for Windows -->
+<!-- TODO(#65): Bootable USB stick creation is not documented for Windows -->
 
 ## Controls
 
