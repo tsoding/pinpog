@@ -109,9 +109,8 @@ draw_frame:
     xor ax, ax
     mov ds, ax
 
-    xor ax, ax
     mov es, ax
-    mov ax, 0x1300
+    mov ah, 0x13
     mov bx, 0x0064
     mov cl, SCORE_DIGIT_COUNT
     xor dx, dx
