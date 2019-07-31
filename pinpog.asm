@@ -198,12 +198,8 @@ running_state:
     ; ball_y >= bar_y - BALL_HEIGHT => bounce
     sub ax, BALL_HEIGHT / 2
     cmp word [game_state + GameState.ball_y], ax
-    jge .bounce
-    jmp .kebab_end
+    jl .kebab_end
 
-.kebab:
-    mov word [game_state + GameState.ball_dy], 0
-    jmp .score_point
 .bounce:
     mov word [game_state + GameState.ball_dy], -BALL_VELOCITY
     mov word [game_state + GameState.ball_dx], BALL_VELOCITY
@@ -211,6 +207,9 @@ running_state:
     test ax, ax
     jns .score_point
     neg word [game_state + GameState.ball_dx]
+    jmp .score_point
+.kebab:
+    mov word [game_state + GameState.ball_dy], 0
     ;; Fall through
 .score_point:
     mov si, SCORE_DIGIT_COUNT
