@@ -46,7 +46,7 @@ struc GameState
   .bar_x: resw 1
   .bar_y: resw 1
   .bar_dx: resw 1
-  .bar_len: resb 1
+  .bar_len: resw 1
   .score_sign resb SCORE_DIGIT_COUNT
 endstruc
 
@@ -162,9 +162,8 @@ running_state:
     cmp word [game_state + GameState.bar_x], ax
     jle .neg_bar_dx
 
-    mov al, byte [game_state + GameState.bar_len]
-    neg ax
-    add ax, WIDTH
+    mov ax, WIDTH
+    sub ax, word [game_state + GameState.bar_len]
     cmp word [game_state + GameState.bar_x], ax
     jge .neg_bar_dx
 
@@ -182,7 +181,7 @@ running_state:
     jg .unkebab
 
     sub bx, word [game_state + GameState.bar_x]
-    movzx ax, byte [game_state + GameState.bar_len]
+    mov ax, word [game_state + GameState.bar_len]
     sub ax, BALL_WIDTH
     cmp bx, ax
     jg .unkebab
@@ -226,9 +225,9 @@ running_state:
     jmp .loop
 .end:
 
-    cmp byte [game_state + GameState.bar_len], 20
+    cmp word [game_state + GameState.bar_len], 20
     jle .kebab_end
-    sub byte [game_state + GameState.bar_len], 1
+    dec word [game_state + GameState.bar_len]
     jmp .kebab_end
 
 .unkebab:
@@ -274,7 +273,7 @@ stop_state:
     iret
 
 fill_bar:
-    movzx cx, byte [game_state + GameState.bar_len]
+    mov cx, word [game_state + GameState.bar_len]
     mov bx, BAR_HEIGHT
     mov si, game_state + GameState.bar_x
     jmp fill_rect
@@ -315,7 +314,7 @@ istruc GameState
   at GameState.bar_x, dw 10
   at GameState.bar_y, dw HEIGHT - BAR_INITIAL_Y
   at GameState.bar_dx, dw BAR_VELOCITY
-  at GameState.bar_len, db 100
+  at GameState.bar_len, dw 100
   at GameState.score_sign, times SCORE_DIGIT_COUNT db '0'
 iend
 
