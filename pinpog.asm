@@ -38,7 +38,7 @@
 %define SCORE_DIGIT_COUNT 5
 
 struc GameState
-  .state: resw 1
+  .running: resb 1
   .ball_x: resw 1
   .ball_y: resw 1
   .ball_dx: resw 1
@@ -94,13 +94,7 @@ entry:
     mov word [game_state + GameState.bar_dx], BAR_VELOCITY
     jmp .loop
 .toggle_pause:
-    mov ax, [game_state + GameState.state]
-    cmp ax, stop_state
-    jz .unpause
-    mov word [game_state + GameState.state], stop_state
-    jmp .loop
-.unpause:
-    mov word [game_state + GameState.state], running_state
+    not byte [game_state + GameState.running]
     jmp .loop
 
 draw_frame:
@@ -121,7 +115,8 @@ draw_frame:
     mov ax, VGA_OFFSET
     mov es, ax
 
-    jmp [game_state + GameState.state]
+    test byte [game_state + GameState.running], 1
+    jz stop_state
 
 running_state:
     mov al, BACKGROUND_COLOR
@@ -267,7 +262,8 @@ running_state:
     mov dl, COLUMNS / 2 - game_over_sign_len / 2
     mov bp, game_over_sign
     int 10h
-    mov word [game_state + GameState.state], stop_state
+    mov byte [game_state + GameState.running], 0
+
 stop_state:
     popa
     iret
@@ -306,7 +302,7 @@ fill_rect:
 
 initial_game_state:
 istruc GameState
-  at GameState.state, dw running_state
+  at GameState.running, db 1
   at GameState.ball_x, dw 30
   at GameState.ball_y, dw 30
   at GameState.ball_dx, dw BALL_VELOCITY
