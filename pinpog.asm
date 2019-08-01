@@ -103,9 +103,8 @@ draw_frame:
     xor ax, ax
     mov ds, ax
 
-    xor ax, ax
     mov es, ax
-    mov ax, 0x1300
+    mov ah, 0x13
     mov bx, 0x0064
     mov cl, SCORE_DIGIT_COUNT
     xor dx, dx
@@ -160,9 +159,8 @@ running_state:
     mov ax, WIDTH
     sub ax, word [game_state + GameState.bar_len]
     cmp word [game_state + GameState.bar_x], ax
-    jge .neg_bar_dx
+    jl .bar_x_col
 
-    jmp .bar_x_col
 .neg_bar_dx:
     neg word [game_state + GameState.bar_dx]
     mov word [game_state + GameState.bar_x], ax
@@ -194,12 +192,8 @@ running_state:
     ; ball_y >= bar_y - BALL_HEIGHT => bounce
     sub ax, BALL_HEIGHT / 2
     cmp word [game_state + GameState.ball_y], ax
-    jge .bounce
-    jmp .kebab_end
+    jl .kebab_end
 
-.kebab:
-    mov word [game_state + GameState.ball_dy], 0
-    jmp .score_point
 .bounce:
     mov word [game_state + GameState.ball_dy], -BALL_VELOCITY
     mov word [game_state + GameState.ball_dx], BALL_VELOCITY
@@ -207,6 +201,9 @@ running_state:
     test ax, ax
     jns .score_point
     neg word [game_state + GameState.ball_dx]
+    jmp .score_point
+.kebab:
+    mov word [game_state + GameState.ball_dy], 0
     ;; Fall through
 .score_point:
     mov si, SCORE_DIGIT_COUNT
@@ -254,12 +251,12 @@ running_state:
 .game_over:
     xor ax, ax
     mov es, ax
-    mov ax, 0x1300
+    mov ah, 0x13
     mov bx, 0x0064
-    xor ch, ch
-    mov cl, game_over_sign_len
-    mov dh, ROWS / 2
-    mov dl, COLUMNS / 2 - game_over_sign_len / 2
+    ; ch = 0 ; cl = game_over_sign_len
+    mov cx, game_over_sign_len
+    ; dh = ROWS / 2 ; dl = COLUMNS / 2 - game_over_sign_len / 2
+    mov dx, (ROWS / 2) << 8 | (COLUMNS / 2 - game_over_sign_len / 2)
     mov bp, game_over_sign
     int 10h
     mov byte [game_state + GameState.running], 0
