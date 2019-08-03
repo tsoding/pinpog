@@ -4,6 +4,11 @@
 %define COLUMNS 40
 %define ROWS 25
 
+; The frequency of the score beep, in Hz. 0 means disabled.
+; The valid range is approximately 19 through 1193182, but the
+; resolution is limited so you may not get the exact frequency.
+%define BEEP_FREQUENCY 131
+
 %define COLOR_BLACK 0
 %define COLOR_BLUE 1
 %define COLOR_GREEN 2
@@ -64,6 +69,20 @@ entry:
     mov di, game_state
     rep movsb
 
+    %if BEEP_FREQUENCY != 0
+        ; Set up the frequency of the Programmable Interval Timer (PIT)
+        ; channel that is used to generate PC speaker sounds.
+        ; 1193182 is the base frequency the PIT runs at.
+        %define pitFrequencyDivisor (1193182 / BEEP_FREQUENCY)
+        mov al, 0xb6
+        out 0x43, al
+        mov al, pitFrequencyDivisor & 0xff
+        out 0x42, al
+        mov al, (pitFrequencyDivisor >> 8) & 0xff
+        out 0x42, al
+        %undef pitFrequencyDivisor
+    %endif
+
     mov dword [0x0070], draw_frame
 .loop:
     hlt
@@ -113,6 +132,13 @@ draw_frame:
 
     mov ax, VGA_OFFSET
     mov es, ax
+
+    %if BEEP_FREQUENCY != 0
+        ; Stop the PC speaker beep (disable the PIT channel)
+        in al, 0x61
+        and al, 11111100b
+        out 0x61, al
+    %endif
 
     test byte [game_state + GameState.running], 1
     jz stop_state
@@ -208,6 +234,13 @@ running_state:
     mov word [game_state + GameState.ball_dy], 0
     ;; Fall through
 .score_point:
+    %if BEEP_FREQUENCY != 0
+        ; Start the PC speaker beep (enable the PIT channel)
+        in al, 0x61
+        or al, 00000011b
+        out 0x61, al
+    %endif
+
     mov si, SCORE_DIGIT_COUNT
 .loop:
     inc byte [game_state + GameState.score_sign + si - 1]

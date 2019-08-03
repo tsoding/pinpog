@@ -30,7 +30,7 @@ $ nasm pinpog.asm -o pinpog
 ### Run the game in QEMU
 
 ```console
-$ qemu-system-i386 pinpog
+$ qemu-system-i386 -soundhw pcspk pinpog
 ```
 
 ## Making Bootable USB stick

@@ -12,7 +12,7 @@ Operating System.
 Install [qemu](https://www.qemu.org/) first.
 
 ```console
-$ qemu-system-i386 pinpog
+$ qemu-system-i386 -soundhw pcspk pinpog
 ```
 
 ## Making Bootable USB stick on Linux

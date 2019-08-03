@@ -2,7 +2,7 @@ VERSION=1.0
 
 .PHONY: all
 all: pinpog
-	qemu-system-i386 -monitor stdio pinpog
+	qemu-system-i386 -soundhw pcspk -monitor stdio pinpog
 
 pinpog: pinpog.asm
 	nasm pinpog.asm -o pinpog
