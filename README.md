@@ -47,9 +47,12 @@ $ qemu-system-i386 pinpog
 
 ### Windows
 
-[TBD](https://github.com/tsoding/pinpog/issues/65)
+1. Download UltraISO https://www.ultraiso.com/
+1. In nasm navigate to pinpong.asm and type in "nasm pinpog.asm -o pinpog.bin".
+1. Open UltraISO and open the .bin file by going to New->Bootable CD/DVD Image.
+1. Go To File->Save As and type in the desired name of your iso.
+1. Create a disk image using any disk image utility.
 
-<!-- TODO(#65): Bootable USB stick creation is not documented for Windows -->
 
 ## Controls
 
