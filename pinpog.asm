@@ -25,13 +25,13 @@
 
 %define BALL_WIDTH 16
 %define BALL_HEIGHT 16
-%define BALL_VELOCITY 6
+%define BALL_VELOCITY 2
 %define BALL_COLOR COLOR_YELLOW
 
 %define BAR_INITIAL_Y 50
 %define BAR_HEIGHT 3
 %define BAR_COLOR COLOR_LIGHTBLUE
-%define BAR_VELOCITY 10
+%define BAR_VELOCITY 3
 
 %define VGA_OFFSET 0xA000
 
@@ -63,6 +63,29 @@ entry:
     mov si, initial_game_state
     mov di, game_state
     rep movsb
+
+    ;; reprogramming channel 0 of PIT to get 60 fps rendering
+    ;; for reference https://wiki.osdev.org/Programmable_Interval_Timer
+    ;; reload value = 1193182 Hz / 60 Hz = 19886 = 0x4DAE
+
+    ;; writing 0b00110100 to I/O-port 0x43 (PIT command register)
+    ;;           00...... channel 0
+    ;;           ..11.... access mode: lobyte/hibyte
+    ;;           ....010. mode 2 (rate generator)
+    ;;           .......0 16-bit binary mode
+    ;; then writing the reload value 0x4DAE to I/O-port 0x40 (channel 0 data port)
+    ;; in two steps (low byte, then high byte)
+
+    cli
+    mov dx, 0x43
+    mov al, 0b00110100
+    out dx, al
+    mov dx, 0x40
+    mov al, 0xAE
+    out dx, al
+    mov al, 0x4D
+    out dx, al
+    sti
 
     mov dword [0x0070], draw_frame
 .loop:
