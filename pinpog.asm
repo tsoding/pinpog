@@ -77,14 +77,12 @@ entry:
     ;; in two steps (low byte, then high byte)
 
     cli
-    mov dx, 0x43
     mov al, 0b00110100
-    out dx, al
-    mov dx, 0x40
+    out 0x43, al
     mov al, 0xAE
-    out dx, al
+    out 0x40, al
     mov al, 0x4D
-    out dx, al
+    out 0x40, al
     sti
 
     mov dword [0x0070], draw_frame
