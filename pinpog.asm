@@ -122,7 +122,6 @@ draw_frame:
     pusha
 
     xor ax, ax
-    mov ds, ax
 
     mov es, ax
     mov ah, 0x13
@@ -229,15 +228,14 @@ running_state:
     mov word [game_state + GameState.ball_dy], 0
     ;; Fall through
 .score_point:
-    mov si, SCORE_DIGIT_COUNT
+    mov di, game_state + GameState.score_sign + SCORE_DIGIT_COUNT - 1
 .loop:
-    inc byte [game_state + GameState.score_sign + si - 1]
-    cmp byte [game_state + GameState.score_sign + si - 1], '9'
+    inc byte [di]
+    cmp byte [di], '9'
     jle .end
-    mov byte [game_state + GameState.score_sign + si - 1], '0'
-    dec si
-    jz .end
-    jmp .loop
+    mov byte [di], '0'
+    dec di
+    jnz .loop
 .end:
 
     cmp word [game_state + GameState.bar_len], 20
